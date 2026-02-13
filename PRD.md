@@ -107,11 +107,11 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Success criteria**: Downloaded texts are fully searchable offline; Compare works offline for downloaded translations; pack sizes are displayed; licenses are enforced
 
 ### 9. Accessibility and Reading Settings
-- **Functionality**: Font family selection, size adjustment, line spacing, night mode, high-contrast mode, verse number display options, red-letter Jesus quotes toggle, and screen reader optimization
-- **Purpose**: Make ancient texts readable for everyone regardless of visual ability, lighting conditions, or reading preferences
-- **Trigger**: Settings → Reading; or quick-access font size slider in Reader header
-- **Progression**: Reader view → Tap settings icon → Adjust font size slider → Change font family → Toggle night mode → Adjust line spacing → Preview changes live → Close settings → Continue reading with new settings → Settings persist
-- **Success criteria**: All settings apply instantly; night mode is WCAG AA compliant; font size range is 12-24pt; settings sync across devices
+- **Functionality**: Font family selection, size adjustment, line spacing, dark mode (system-wide theme toggle), high-contrast mode, verse number display options, red-letter Jesus quotes toggle, screen reader optimization, and keyboard shortcuts for common actions. Dark mode can be toggled via Settings panel, header button (moon/sun icon), or keyboard shortcut (Ctrl+D).
+- **Purpose**: Make ancient texts readable for everyone regardless of visual ability, lighting conditions, or reading preferences. Dark mode provides a comfortable reading experience in low-light environments across the entire application.
+- **Trigger**: Settings → Reading; quick-access header button; keyboard shortcut Ctrl+D; or font size slider in Reader header
+- **Progression**: Any view → Click moon/sun icon in header (or press Ctrl+D) → Dark mode toggles instantly across entire app → All views update with dark color palette → Return to Settings → Adjust font size slider → Change font family → Fine-tune line spacing → Preview changes live → Close settings → Continue reading with new settings → Settings persist across sessions
+- **Success criteria**: All settings apply instantly; dark mode is WCAG AA compliant with proper contrast ratios; dark mode affects all views and components consistently; font size range is 12-28pt; settings sync across devices; keyboard shortcut works from any screen
 
 ### 10. Reading Plans with Daily Chapters
 - **Functionality**: Structured Bible reading plans with daily chapter assignments, progress tracking, calendar view, streak monitoring, custom plan creation with personalized chapter selections, integration with Bible Reader to open today's chapters directly, and reading plan reminders with notification settings

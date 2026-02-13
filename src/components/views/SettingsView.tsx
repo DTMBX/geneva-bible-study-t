@@ -178,15 +178,15 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
               Appearance
             </CardTitle>
             <CardDescription>
-              Theme and display settings
+              Dark mode and display settings for comfortable reading
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label>Night Mode</Label>
+                <Label>Dark Mode</Label>
                 <p className="text-sm text-muted-foreground">
-                  Reduce eye strain in low light
+                  Switch to dark theme for reading comfort in low light conditions. Changes apply immediately across the entire app.
                 </p>
               </div>
               <Switch

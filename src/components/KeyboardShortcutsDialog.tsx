@@ -62,6 +62,7 @@ export default function KeyboardShortcutsDialog({ open, onOpenChange }: Keyboard
     {
       category: 'General',
       items: [
+        { keys: [modKey, 'D'], description: 'Toggle dark mode' },
         { keys: [modKey, 'S'], description: 'Save/Submit' },
         { keys: [modKey, ','], description: 'Open settings' },
         { keys: [modKey, '/'], description: 'Show keyboard shortcuts' },

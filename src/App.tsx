@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, CalendarCheck, Users, ChatCircle, UsersThree, PushPin } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, CalendarCheck, Users, ChatCircle, UsersThree, PushPin, Moon, Sun } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
+import { useDarkMode } from '@/hooks/use-dark-mode'
 import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog'
 import HomeView from '@/components/views/HomeView'
 import LibraryView from '@/components/views/LibraryView'
@@ -23,10 +24,11 @@ import type { UserProfile, FriendRequest, Conversation, GroupDiscussion } from '
 
 function App() {
   const isMobile = useIsMobile()
+  const isDarkMode = useDarkMode()
   const [activeTab, setActiveTab] = useState('home')
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   
-  const [userProfile] = useKV<UserProfile>('user-profile', {
+  const [userProfile, setUserProfile] = useKV<UserProfile>('user-profile', {
     id: 'default-user',
     displayName: 'Reader',
     role: 'reader',
@@ -92,6 +94,20 @@ function App() {
       ctrl: true,
       description: 'Show keyboard shortcuts',
       action: () => setShowKeyboardShortcuts(true)
+    },
+    {
+      key: 'd',
+      ctrl: true,
+      description: 'Toggle dark mode',
+      action: () => {
+        setUserProfile(current => ({
+          ...current!,
+          preferences: {
+            ...current!.preferences,
+            nightMode: !current!.preferences.nightMode
+          }
+        }))
+      }
     },
     {
       key: ',',
@@ -161,26 +177,48 @@ function App() {
             Geneva Bible Study
           </h1>
         </div>
-        {!isMobile && groupsWithNewPins > 0 && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActiveTab('pinned-messages')}
-            className="gap-2"
-          >
-            <PushPin size={18} weight="fill" />
-            <span>{groupsWithNewPins} group{groupsWithNewPins !== 1 ? 's' : ''} with pins</span>
-          </Button>
-        )}
-        {!isMobile && (
+        <div className="flex items-center gap-2">
+          {!isMobile && groupsWithNewPins > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setActiveTab('pinned-messages')}
+              className="gap-2"
+            >
+              <PushPin size={18} weight="fill" />
+              <span>{groupsWithNewPins} group{groupsWithNewPins !== 1 ? 's' : ''} with pins</span>
+            </Button>
+          )}
           <button
-            onClick={() => setActiveTab('settings')}
+            onClick={() => {
+              setUserProfile(current => ({
+                ...current!,
+                preferences: {
+                  ...current!.preferences,
+                  nightMode: !current!.preferences.nightMode
+                }
+              }))
+            }}
             className="p-2 hover:bg-muted rounded-md transition-colors"
-            aria-label="Settings"
+            aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            <Gear size={24} weight="duotone" className="text-muted-foreground" />
+            {isDarkMode ? (
+              <Sun size={24} weight="duotone" className="text-muted-foreground" />
+            ) : (
+              <Moon size={24} weight="duotone" className="text-muted-foreground" />
+            )}
           </button>
-        )}
+          {!isMobile && (
+            <button
+              onClick={() => setActiveTab('settings')}
+              className="p-2 hover:bg-muted rounded-md transition-colors"
+              aria-label="Settings"
+            >
+              <Gear size={24} weight="duotone" className="text-muted-foreground" />
+            </button>
+          )}
+        </div>
       </header>
 
       <div className="flex-1 overflow-hidden">
