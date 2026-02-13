@@ -469,7 +469,7 @@ export interface GroupDiscussion {
 
 export type NarratorGender = 'male' | 'female'
 
-export type NarratorAccent = 'american' | 'british' | 'neutral'
+export type NarratorAccent = 'american' | 'british' | 'australian' | 'neutral'
 
 export interface AudioNarrator {
   id: string

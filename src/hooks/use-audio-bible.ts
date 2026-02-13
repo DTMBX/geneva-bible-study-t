@@ -25,6 +25,67 @@ export function useAvailableVoices() {
 export function useAudioNarrators(): AudioNarrator[] {
   const voices = useAvailableVoices()
 
+  const usVoices = voices.filter(v => v.lang.startsWith('en-US') || v.lang.startsWith('en_US'))
+  const gbVoices = voices.filter(v => v.lang.startsWith('en-GB') || v.lang.startsWith('en_GB'))
+  const auVoices = voices.filter(v => v.lang.startsWith('en-AU') || v.lang.startsWith('en_AU'))
+  const otherEnVoices = voices.filter(v => v.lang.startsWith('en') && !v.lang.startsWith('en-US') && !v.lang.startsWith('en-GB') && !v.lang.startsWith('en-AU'))
+
+  const maleNames = ['david', 'daniel', 'james', 'thomas', 'george', 'alex', 'fred', 'paul', 'john', 'michael', 'aaron', 'arthur', 'bruce', 'oliver', 'william', 'nathan', 'samuel', 'timothy', 'matthew']
+  const femaleNames = ['samantha', 'victoria', 'karen', 'sarah', 'kate', 'anna', 'susan', 'zoe', 'fiona', 'moira', 'catherine', 'elizabeth', 'alice', 'jessica', 'nicole', 'natalie', 'emily', 'emma']
+
+  const isLikelyMale = (voice: SpeechSynthesisVoice) => {
+    const name = voice.name.toLowerCase()
+    return maleNames.some(n => name.includes(n)) || name.includes('male')
+  }
+
+  const isLikelyFemale = (voice: SpeechSynthesisVoice) => {
+    const name = voice.name.toLowerCase()
+    return femaleNames.some(n => name.includes(n)) || name.includes('female')
+  }
+
+  const getVoicesByGender = (voiceList: SpeechSynthesisVoice[], preferMale: boolean) => {
+    const gendered = voiceList.filter(v => preferMale ? isLikelyMale(v) : isLikelyFemale(v))
+    return gendered.length > 0 ? gendered : voiceList
+  }
+
+  const pickUnique = (voiceList: SpeechSynthesisVoice[], usedVoices: SpeechSynthesisVoice[]) => {
+    const unused = voiceList.filter(v => !usedVoices.includes(v))
+    return unused.length > 0 ? unused[0] : voiceList[0]
+  }
+
+  const usedVoices: SpeechSynthesisVoice[] = []
+
+  const usMaleVoices = getVoicesByGender(usVoices, true)
+  const usMale = usMaleVoices[0] || usVoices[0] || voices[0] || null
+  if (usMale) usedVoices.push(usMale)
+
+  const usFemaleVoices = getVoicesByGender(usVoices, false)
+  const usFemale = pickUnique(usFemaleVoices, usedVoices) || usVoices[Math.min(1, usVoices.length - 1)] || voices[0] || null
+  if (usFemale) usedVoices.push(usFemale)
+
+  const gbMaleVoices = getVoicesByGender(gbVoices, true)
+  const gbMale = pickUnique(gbMaleVoices.length > 0 ? gbMaleVoices : [...gbVoices, ...usVoices], usedVoices)
+  if (gbMale) usedVoices.push(gbMale)
+
+  const gbFemaleVoices = getVoicesByGender(gbVoices, false)
+  const gbFemale = pickUnique(gbFemaleVoices.length > 0 ? gbFemaleVoices : [...gbVoices, ...usVoices], usedVoices)
+  if (gbFemale) usedVoices.push(gbFemale)
+
+  const auMaleVoices = getVoicesByGender(auVoices, true)
+  const auMale = pickUnique(auMaleVoices.length > 0 ? auMaleVoices : [...auVoices, ...usVoices], usedVoices)
+  if (auMale) usedVoices.push(auMale)
+
+  const auFemaleVoices = getVoicesByGender(auVoices, false)
+  const auFemale = pickUnique(auFemaleVoices.length > 0 ? auFemaleVoices : [...auVoices, ...usVoices], usedVoices)
+  if (auFemale) usedVoices.push(auFemale)
+
+  const additionalVoices = [...otherEnVoices, ...usVoices, ...gbVoices, ...auVoices].filter(v => !usedVoices.includes(v))
+  const extra1 = additionalVoices[0] || null
+  if (extra1) usedVoices.push(extra1)
+
+  const extra2 = additionalVoices[1] || null
+  if (extra2) usedVoices.push(extra2)
+
   const narrators: AudioNarrator[] = [
     {
       id: 'david-american',
@@ -32,9 +93,7 @@ export function useAudioNarrators(): AudioNarrator[] {
       description: 'Clear American male voice, excellent for study',
       gender: 'male',
       accent: 'american',
-      voice: voices.find(v => v.lang.startsWith('en-US') && v.name.toLowerCase().includes('male')) || 
-             voices.find(v => v.lang.startsWith('en-US')) || 
-             voices[0] || null,
+      voice: usMale,
       previewText: 'In the beginning God created the heaven and the earth.',
       quality: 'standard'
     },
@@ -44,10 +103,7 @@ export function useAudioNarrators(): AudioNarrator[] {
       description: 'Warm American female voice, comforting tone',
       gender: 'female',
       accent: 'american',
-      voice: voices.find(v => v.lang.startsWith('en-US') && v.name.toLowerCase().includes('female')) || 
-             voices.find(v => v.lang.startsWith('en-US') && !v.name.toLowerCase().includes('male')) ||
-             voices.find(v => v.lang.startsWith('en-US')) || 
-             voices[0] || null,
+      voice: usFemale,
       previewText: 'The Lord is my shepherd; I shall not want.',
       quality: 'standard'
     },
@@ -57,10 +113,7 @@ export function useAudioNarrators(): AudioNarrator[] {
       description: 'Distinguished British male voice, traditional reading',
       gender: 'male',
       accent: 'british',
-      voice: voices.find(v => v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('male')) || 
-             voices.find(v => v.lang.startsWith('en-GB')) ||
-             voices.find(v => v.lang.startsWith('en-US')) || 
-             voices[0] || null,
+      voice: gbMale,
       previewText: 'For God so loved the world, that he gave his only begotten Son.',
       quality: 'premium'
     },
@@ -70,13 +123,49 @@ export function useAudioNarrators(): AudioNarrator[] {
       description: 'Elegant British female voice, refined reading',
       gender: 'female',
       accent: 'british',
-      voice: voices.find(v => v.lang.startsWith('en-GB') && v.name.toLowerCase().includes('female')) || 
-             voices.find(v => v.lang.startsWith('en-GB') && !v.name.toLowerCase().includes('male')) ||
-             voices.find(v => v.lang.startsWith('en-GB')) ||
-             voices.find(v => v.lang.startsWith('en-US')) || 
-             voices[0] || null,
+      voice: gbFemale,
       previewText: 'Blessed are the pure in heart: for they shall see God.',
       quality: 'premium'
+    },
+    {
+      id: 'nathan-australian',
+      name: 'Nathan',
+      description: 'Friendly Australian male voice, engaging delivery',
+      gender: 'male',
+      accent: 'australian',
+      voice: auMale,
+      previewText: 'Trust in the Lord with all thine heart and lean not unto thine own understanding.',
+      quality: 'standard'
+    },
+    {
+      id: 'olivia-australian',
+      name: 'Olivia',
+      description: 'Gentle Australian female voice, soothing tone',
+      gender: 'female',
+      accent: 'australian',
+      voice: auFemale,
+      previewText: 'The Lord is my light and my salvation; whom shall I fear?',
+      quality: 'standard'
+    },
+    {
+      id: 'voice-7',
+      name: extra1?.name.split(' ')[0] || 'Reader 7',
+      description: 'Additional narrator option for variety',
+      gender: isLikelyFemale(extra1 || voices[0]) ? 'female' : 'male',
+      accent: extra1?.lang.includes('GB') ? 'british' : extra1?.lang.includes('AU') ? 'australian' : 'american',
+      voice: extra1,
+      previewText: 'The fear of the Lord is the beginning of wisdom.',
+      quality: 'standard'
+    },
+    {
+      id: 'voice-8',
+      name: extra2?.name.split(' ')[0] || 'Reader 8',
+      description: 'Additional narrator option for variety',
+      gender: isLikelyFemale(extra2 || voices[0]) ? 'female' : 'male',
+      accent: extra2?.lang.includes('GB') ? 'british' : extra2?.lang.includes('AU') ? 'australian' : 'american',
+      voice: extra2,
+      previewText: 'Be strong and of good courage; be not afraid, neither be thou dismayed.',
+      quality: 'standard'
     }
   ]
 
