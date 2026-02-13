@@ -410,3 +410,57 @@ export interface Conversation {
   unreadCount: Record<string, number>
   createdAt: number
 }
+
+export interface GroupMessage {
+  id: string
+  groupId: string
+  fromUserId: string
+  fromUserName: string
+  fromUserAvatar?: string
+  content: string
+  verseReference?: {
+    bookName: string
+    chapterNumber: number
+    verseNumber: number
+    verseEndNumber?: number
+    verseText?: string
+    translation?: string
+  }
+  createdAt: number
+  editedAt?: number
+  reactions: Record<string, string[]>
+}
+
+export interface GroupDiscussion {
+  id: string
+  name: string
+  description: string
+  createdBy: string
+  createdByName: string
+  createdByAvatar?: string
+  memberIds: string[]
+  members: {
+    userId: string
+    userName: string
+    userAvatar?: string
+    role: 'admin' | 'moderator' | 'member'
+    joinedAt: number
+  }[]
+  topic?: string
+  relatedReadingPlanId?: string
+  relatedPassage?: {
+    bookName: string
+    chapterNumber: number
+    verseNumber?: number
+  }
+  privacy: 'public' | 'friends-only' | 'invite-only'
+  lastMessageAt: number
+  unreadCount: Record<string, number>
+  createdAt: number
+  pinnedMessageIds: string[]
+  settings: {
+    allowInvites: boolean
+    anyoneCanPost: boolean
+    moderationEnabled: boolean
+  }
+}

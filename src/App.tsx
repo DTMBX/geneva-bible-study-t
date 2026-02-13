@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users, ChatCircle } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users, ChatCircle, UsersThree } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -13,9 +13,10 @@ import SettingsView from '@/components/views/SettingsView'
 import ReadingPlanView from '@/components/views/ReadingPlanView'
 import SocialView from '@/components/views/SocialView'
 import MessagesView from '@/components/views/MessagesView'
+import GroupDiscussionsView from '@/components/views/GroupDiscussionsView'
 import ReaderView from '@/components/reader/ReaderView'
 import BibleApiDemo from '@/components/BibleApiDemo'
-import type { UserProfile, FriendRequest, Conversation } from '@/lib/types'
+import type { UserProfile, FriendRequest, Conversation, GroupDiscussion } from '@/lib/types'
 
 function App() {
   const isMobile = useIsMobile()
@@ -39,6 +40,7 @@ function App() {
 
   const [friendRequests = []] = useKV<FriendRequest[]>('friend-requests', [])
   const [conversations = []] = useKV<Conversation[]>('conversations', [])
+  const [groups = []] = useKV<GroupDiscussion[]>('group-discussions', [])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [messageNavigation, setMessageNavigation] = useState<{ friendId: string; verseRef?: any } | null>(null)
 
@@ -53,6 +55,10 @@ function App() {
   const pendingRequestCount = friendRequests.filter(req => req.status === 'pending').length
   const unreadMessagesCount = conversations.reduce((total, conv) => {
     return total + (conv.unreadCount[currentUserId] || 0)
+  }, 0)
+  const userGroups = groups.filter(g => g.memberIds.includes(currentUserId))
+  const unreadGroupsCount = userGroups.reduce((total, group) => {
+    return total + (group.unreadCount[currentUserId] || 0)
   }, 0)
 
   const handleNavigateToReader = (bookId: string, chapter: number) => {
@@ -129,7 +135,7 @@ function App() {
                 </TabsContent>
               </div>
 
-              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-9 bg-card">
+              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-10 bg-card">
                 <TabsTrigger value="api-demo" className="flex-col gap-1 data-[state=active]:text-primary">
                   <Code size={24} weight="duotone" />
                   <span className="text-xs">API</span>
@@ -169,10 +175,19 @@ function App() {
                 </TabsTrigger>
                 <TabsTrigger value="messages" className="flex-col gap-1 data-[state=active]:text-primary relative">
                   <ChatCircle size={24} weight="duotone" />
-                  <span className="text-xs">Messages</span>
+                  <span className="text-xs">Chat</span>
                   {unreadMessagesCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-primary">
                       {unreadMessagesCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="groups" className="flex-col gap-1 data-[state=active]:text-primary relative">
+                  <UsersThree size={24} weight="duotone" />
+                  <span className="text-xs">Groups</span>
+                  {unreadGroupsCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-primary">
+                      {unreadGroupsCount}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -231,6 +246,15 @@ function App() {
                     </Badge>
                   )}
                 </TabsTrigger>
+                <TabsTrigger value="groups" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
+                  <UsersThree size={24} weight="duotone" />
+                  <span>Groups</span>
+                  {unreadGroupsCount > 0 && (
+                    <Badge className="ml-auto h-6 w-6 flex items-center justify-center p-0 text-xs bg-primary">
+                      {unreadGroupsCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
                 <div className="flex-1" />
                 <TabsTrigger value="settings" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Gear size={24} weight="duotone" />
@@ -268,6 +292,9 @@ function App() {
                 </TabsContent>
                 <TabsContent value="messages" className="mt-0 h-full">
                   <MessagesView initialNavigation={messageNavigation} onClearNavigation={() => setMessageNavigation(null)} />
+                </TabsContent>
+                <TabsContent value="groups" className="mt-0 h-full">
+                  <GroupDiscussionsView />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
                   <SettingsView userProfile={userProfile!} />
