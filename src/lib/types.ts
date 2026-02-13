@@ -428,6 +428,8 @@ export interface GroupMessage {
   }
   createdAt: number
   editedAt?: number
+  deletedAt?: number
+  deletedBy?: string
   reactions: Record<string, string[]>
 }
 

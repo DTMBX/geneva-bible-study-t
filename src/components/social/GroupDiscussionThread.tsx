@@ -2,9 +2,20 @@ import { useState, useEffect, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,13 +40,17 @@ import {
   Bookmark,
   BookOpen,
   PushPin,
-  X
+  X,
+  PencilSimple,
+  Trash,
+  Gear
 } from '@phosphor-icons/react'
 import type { GroupDiscussion, GroupMessage } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import { toast } from 'sonner'
 import GroupInfoDialog from './GroupInfoDialog'
 import InviteMembersDialog from './InviteMembersDialog'
+import GroupAdminSettingsDialog from './GroupAdminSettingsDialog'
 
 interface GroupDiscussionThreadProps {
   groupId: string
@@ -60,9 +75,12 @@ export default function GroupDiscussionThread({
   const [groups = [], setGroups] = useKV<GroupDiscussion[]>('group-discussions', [])
   const [messages = [], setMessages] = useKV<GroupMessage[]>(`group-messages-${groupId}`, [])
   const [newMessage, setNewMessage] = useState('')
+  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null)
+  const [deletingMessage, setDeletingMessage] = useState<{ id: string; content: string } | null>(null)
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null)
   const [showInfoDialog, setShowInfoDialog] = useState(false)
   const [showInviteDialog, setShowInviteDialog] = useState(false)
+  const [showAdminSettings, setShowAdminSettings] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -203,6 +221,48 @@ export default function GroupDiscussionThread({
     toast.success(isPinned ? 'Message unpinned' : 'Message pinned')
   }
 
+  const handleEditMessage = (messageId: string, newContent: string) => {
+    if (!newContent.trim()) {
+      toast.error('Message cannot be empty')
+      return
+    }
+
+    setMessages((currentMessages) =>
+      (currentMessages || []).map(msg =>
+        msg.id === messageId
+          ? { ...msg, content: newContent.trim(), editedAt: Date.now() }
+          : msg
+      )
+    )
+
+    setEditingMessage(null)
+    toast.success('Message updated')
+  }
+
+  const handleDeleteMessage = (messageId: string) => {
+    setMessages((currentMessages) =>
+      (currentMessages || []).map(msg =>
+        msg.id === messageId
+          ? { ...msg, deletedAt: Date.now(), deletedBy: currentUserId }
+          : msg
+      )
+    )
+
+    setGroups((currentGroups) =>
+      (currentGroups || []).map(g => {
+        if (g.id !== groupId) return g
+        
+        return {
+          ...g,
+          pinnedMessageIds: g.pinnedMessageIds.filter(id => id !== messageId)
+        }
+      })
+    )
+
+    setDeletingMessage(null)
+    toast.success('Message deleted')
+  }
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -226,11 +286,17 @@ export default function GroupDiscussionThread({
   }
 
   const isAdmin = group.createdBy === currentUserId
-  const isModerator = group.members.find(m => m.userId === currentUserId)?.role === 'moderator'
+  const currentMember = group.members.find(m => m.userId === currentUserId)
+  const isModerator = currentMember?.role === 'moderator' || currentMember?.role === 'admin'
   const canPinMessages = isAdmin || isModerator
 
-  const pinnedMessages = messages.filter(msg => group.pinnedMessageIds.includes(msg.id))
-  const regularMessages = messages.filter(msg => !group.pinnedMessageIds.includes(msg.id))
+  const pinnedMessages = messages.filter(msg => group.pinnedMessageIds.includes(msg.id) && !msg.deletedAt)
+  const regularMessages = messages.filter(msg => !group.pinnedMessageIds.includes(msg.id) && !msg.deletedAt)
+  
+  const newPinnedCount = pinnedMessages.filter(msg => {
+    const lastRead = group.unreadCount[currentUserId] || 0
+    return msg.createdAt > (group.lastMessageAt - lastRead)
+  }).length
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -273,6 +339,12 @@ export default function GroupDiscussionThread({
                   Invite Members
                 </DropdownMenuItem>
               )}
+              {isAdmin && (
+                <DropdownMenuItem onClick={() => setShowAdminSettings(true)}>
+                  <Gear size={18} weight="fill" className="mr-2" />
+                  Admin Settings
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={handleLeaveGroup}
@@ -299,10 +371,17 @@ export default function GroupDiscussionThread({
               <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
                 <PushPin size={16} weight="fill" />
                 <span>Pinned Messages</span>
+                {newPinnedCount > 0 && (
+                  <Badge className="h-5 px-2 text-xs bg-primary">
+                    {newPinnedCount} new
+                  </Badge>
+                )}
               </div>
               <div className="space-y-3">
                 {pinnedMessages.map((message) => {
                   const isOwnMessage = message.fromUserId === currentUserId
+                  const canEdit = isOwnMessage
+                  const canDelete = isOwnMessage || isAdmin || isModerator
 
                   return (
                     <div
@@ -322,6 +401,9 @@ export default function GroupDiscussionThread({
                             <span className="text-xs text-muted-foreground">
                               {formatDistanceToNow(message.createdAt, { addSuffix: true })}
                             </span>
+                            {message.editedAt && (
+                              <span className="text-xs text-muted-foreground italic">(edited)</span>
+                            )}
                             <PushPin size={14} weight="fill" className="text-accent ml-auto" />
                           </div>
 
@@ -365,16 +447,39 @@ export default function GroupDiscussionThread({
                           )}
                         </div>
 
-                        {canPinMessages && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 flex-shrink-0"
-                            onClick={() => handlePinMessage(message.id)}
-                          >
-                            <X size={16} weight="bold" />
-                          </Button>
-                        )}
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
+                              <DotsThreeVertical size={16} weight="bold" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {canPinMessages && (
+                              <DropdownMenuItem onClick={() => handlePinMessage(message.id)}>
+                                <X size={16} weight="bold" className="mr-2" />
+                                Unpin
+                              </DropdownMenuItem>
+                            )}
+                            {canEdit && (
+                              <DropdownMenuItem onClick={() => setEditingMessage({ id: message.id, content: message.content })}>
+                                <PencilSimple size={16} weight="bold" className="mr-2" />
+                                Edit
+                              </DropdownMenuItem>
+                            )}
+                            {canDelete && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => setDeletingMessage({ id: message.id, content: message.content })}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <Trash size={16} weight="bold" className="mr-2" />
+                                  Delete
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
                   )
@@ -394,8 +499,11 @@ export default function GroupDiscussionThread({
           ) : (
             regularMessages.map((message, index) => {
               const isOwnMessage = message.fromUserId === currentUserId
+              const canEdit = isOwnMessage
+              const canDelete = isOwnMessage || isAdmin || isModerator
               const showAvatar = index === 0 || regularMessages[index - 1].fromUserId !== message.fromUserId
               const isPinned = group.pinnedMessageIds.includes(message.id)
+              const isEditing = editingMessage?.id === message.id
 
               return (
                 <div
@@ -417,92 +525,147 @@ export default function GroupDiscussionThread({
                         <span className="text-xs text-muted-foreground">
                           {formatDistanceToNow(message.createdAt, { addSuffix: true })}
                         </span>
+                        {message.editedAt && (
+                          <span className="text-xs text-muted-foreground italic">(edited)</span>
+                        )}
                       </div>
                     )}
 
                     <div className="group/message relative">
-                      <div
-                        className={`rounded-2xl px-4 py-2 inline-block max-w-[85%] ${
-                          isOwnMessage
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
-                        }`}
-                      >
-                        {message.verseReference && (
-                          <div className={`flex items-center gap-2 text-sm mb-2 pb-2 border-b ${
-                            isOwnMessage ? 'border-primary-foreground/20' : 'border-border'
-                          }`}>
-                            <BookOpen size={16} weight="fill" />
-                            <span className="font-medium">
-                              {message.verseReference.bookName} {message.verseReference.chapterNumber}:
-                              {message.verseReference.verseNumber}
-                              {message.verseReference.verseEndNumber &&
-                                `-${message.verseReference.verseEndNumber}`}
-                            </span>
-                          </div>
-                        )}
-                        <p className="whitespace-pre-wrap break-words">{message.content}</p>
-                      </div>
-
-                      {Object.keys(message.reactions).length > 0 && (
-                        <div className="flex gap-1 mt-1 flex-wrap">
-                          {Object.entries(message.reactions).map(([key, userIds]) => {
-                            if (userIds.length === 0) return null
-                            const ReactionIcon = getReactionIcon(key)
-                            const hasReacted = userIds.includes(currentUserId)
-
-                            return (
-                              <button
-                                key={key}
-                                onClick={() => toggleReaction(message.id, key)}
-                                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors ${
-                                  hasReacted
-                                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
-                                    : 'bg-muted hover:bg-muted/80'
-                                }`}
-                              >
-                                <ReactionIcon size={14} weight="fill" />
-                                <span>{userIds.length}</span>
-                              </button>
-                            )
-                          })}
-                        </div>
-                      )}
-
-                      <div className={`absolute top-0 opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1 ${isOwnMessage ? 'left-0 -translate-x-full -ml-2' : 'right-0 translate-x-full mr-2'}`}>
-                        <DropdownMenu
-                          open={showReactionPicker === message.id}
-                          onOpenChange={(open) => setShowReactionPicker(open ? message.id : null)}
-                        >
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7">
-                              <Smiley size={16} weight="fill" />
+                      {isEditing ? (
+                        <div className="space-y-2 max-w-[85%]">
+                          <Textarea
+                            value={editingMessage.content}
+                            onChange={(e) => setEditingMessage({ ...editingMessage, content: e.target.value })}
+                            className="min-h-[80px]"
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <Button
+                              size="sm"
+                              onClick={() => handleEditMessage(message.id, editingMessage.content)}
+                            >
+                              <Check size={16} weight="bold" className="mr-1" />
+                              Save
                             </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            {REACTION_EMOJIS.map(({ icon: Icon, key }) => (
-                              <DropdownMenuItem
-                                key={key}
-                                onClick={() => toggleReaction(message.id, key)}
-                              >
-                                <Icon size={20} weight="fill" className="mr-2" />
-                                {key.charAt(0).toUpperCase() + key.slice(1)}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-
-                        {canPinMessages && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => handlePinMessage(message.id)}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingMessage(null)}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <>
+                          <div
+                            className={`rounded-2xl px-4 py-2 inline-block max-w-[85%] ${
+                              isOwnMessage
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
                           >
-                            <PushPin size={16} weight={isPinned ? 'fill' : 'regular'} />
-                          </Button>
-                        )}
-                      </div>
+                            {message.verseReference && (
+                              <div className={`flex items-center gap-2 text-sm mb-2 pb-2 border-b ${
+                                isOwnMessage ? 'border-primary-foreground/20' : 'border-border'
+                              }`}>
+                                <BookOpen size={16} weight="fill" />
+                                <span className="font-medium">
+                                  {message.verseReference.bookName} {message.verseReference.chapterNumber}:
+                                  {message.verseReference.verseNumber}
+                                  {message.verseReference.verseEndNumber &&
+                                    `-${message.verseReference.verseEndNumber}`}
+                                </span>
+                              </div>
+                            )}
+                            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                          </div>
+
+                          {Object.keys(message.reactions).length > 0 && (
+                            <div className="flex gap-1 mt-1 flex-wrap">
+                              {Object.entries(message.reactions).map(([key, userIds]) => {
+                                if (userIds.length === 0) return null
+                                const ReactionIcon = getReactionIcon(key)
+                                const hasReacted = userIds.includes(currentUserId)
+
+                                return (
+                                  <button
+                                    key={key}
+                                    onClick={() => toggleReaction(message.id, key)}
+                                    className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors ${
+                                      hasReacted
+                                        ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                                        : 'bg-muted hover:bg-muted/80'
+                                    }`}
+                                  >
+                                    <ReactionIcon size={14} weight="fill" />
+                                    <span>{userIds.length}</span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
+
+                          <div className={`absolute top-0 opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1 ${isOwnMessage ? 'left-0 -translate-x-full -ml-2' : 'right-0 translate-x-full mr-2'}`}>
+                            <DropdownMenu
+                              open={showReactionPicker === message.id}
+                              onOpenChange={(open) => setShowReactionPicker(open ? message.id : null)}
+                            >
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <Smiley size={16} weight="fill" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {REACTION_EMOJIS.map(({ icon: Icon, key }) => (
+                                  <DropdownMenuItem
+                                    key={key}
+                                    onClick={() => toggleReaction(message.id, key)}
+                                  >
+                                    <Icon size={20} weight="fill" className="mr-2" />
+                                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-7 w-7">
+                                  <DotsThreeVertical size={16} weight="bold" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {canPinMessages && (
+                                  <DropdownMenuItem onClick={() => handlePinMessage(message.id)}>
+                                    <PushPin size={16} weight={isPinned ? 'fill' : 'regular'} className="mr-2" />
+                                    {isPinned ? 'Unpin' : 'Pin'}
+                                  </DropdownMenuItem>
+                                )}
+                                {canEdit && (
+                                  <DropdownMenuItem onClick={() => setEditingMessage({ id: message.id, content: message.content })}>
+                                    <PencilSimple size={16} weight="bold" className="mr-2" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                )}
+                                {canDelete && (
+                                  <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => setDeletingMessage({ id: message.id, content: message.content })}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash size={16} weight="bold" className="mr-2" />
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -545,6 +708,33 @@ export default function GroupDiscussionThread({
         open={showInviteDialog}
         onOpenChange={setShowInviteDialog}
       />
+
+      <GroupAdminSettingsDialog
+        group={group}
+        open={showAdminSettings}
+        onOpenChange={setShowAdminSettings}
+        currentUserId={currentUserId}
+      />
+
+      <AlertDialog open={!!deletingMessage} onOpenChange={() => setDeletingMessage(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete message?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this message. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deletingMessage && handleDeleteMessage(deletingMessage.id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

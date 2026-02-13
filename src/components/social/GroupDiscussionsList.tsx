@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Plus, UsersThree, MagnifyingGlass, Lock, Users, Globe } from '@phosphor-icons/react'
+import { Plus, UsersThree, MagnifyingGlass, Lock, Users, Globe, PushPin } from '@phosphor-icons/react'
 import type { GroupDiscussion } from '@/lib/types'
 import CreateGroupDialog from './CreateGroupDialog'
 import { formatDistanceToNow } from 'date-fns'
@@ -117,6 +117,7 @@ export default function GroupDiscussionsList({ onSelectGroup }: GroupDiscussions
               {userGroups.map(group => {
                 const unreadCount = getUnreadCount(group)
                 const isUnread = unreadCount > 0
+                const hasPinnedMessages = group.pinnedMessageIds.length > 0
 
                 return (
                   <button
@@ -146,6 +147,9 @@ export default function GroupDiscussionsList({ onSelectGroup }: GroupDiscussions
                             {group.name}
                           </h3>
                           {getPrivacyIcon(group.privacy)}
+                          {hasPinnedMessages && (
+                            <PushPin size={14} weight="fill" className="text-accent ml-auto" />
+                          )}
                         </div>
                         
                         <p className="text-sm text-muted-foreground line-clamp-1 mb-1">
@@ -163,6 +167,15 @@ export default function GroupDiscussionsList({ onSelectGroup }: GroupDiscussions
                               <span>
                                 {formatDistanceToNow(group.lastMessageAt, { addSuffix: true })}
                               </span>
+                            </>
+                          )}
+                          {hasPinnedMessages && (
+                            <>
+                              <span>•</span>
+                              <div className="flex items-center gap-1">
+                                <PushPin size={12} weight="fill" />
+                                <span>{group.pinnedMessageIds.length}</span>
+                              </div>
                             </>
                           )}
                         </div>

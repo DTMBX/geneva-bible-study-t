@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users, ChatCircle, UsersThree } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users, ChatCircle, UsersThree, PushPin } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import HomeView from '@/components/views/HomeView'
 import LibraryView from '@/components/views/LibraryView'
@@ -14,6 +15,7 @@ import ReadingPlanView from '@/components/views/ReadingPlanView'
 import SocialView from '@/components/views/SocialView'
 import MessagesView from '@/components/views/MessagesView'
 import GroupDiscussionsView from '@/components/views/GroupDiscussionsView'
+import PinnedMessagesView from '@/components/views/PinnedMessagesView'
 import ReaderView from '@/components/reader/ReaderView'
 import BibleApiDemo from '@/components/BibleApiDemo'
 import type { UserProfile, FriendRequest, Conversation, GroupDiscussion } from '@/lib/types'
@@ -60,6 +62,8 @@ function App() {
   const unreadGroupsCount = userGroups.reduce((total, group) => {
     return total + (group.unreadCount[currentUserId] || 0)
   }, 0)
+  
+  const groupsWithNewPins = userGroups.filter(group => group.pinnedMessageIds.length > 0).length
 
   const handleNavigateToReader = (bookId: string, chapter: number) => {
     setActiveTab('reader')
@@ -76,6 +80,10 @@ function App() {
     setActiveTab('messages')
   }
 
+  const handleNavigateToGroup = (groupId: string, groupName: string) => {
+    setActiveTab('groups')
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-between">
@@ -85,6 +93,17 @@ function App() {
             Geneva Bible Study
           </h1>
         </div>
+        {!isMobile && groupsWithNewPins > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveTab('pinned-messages')}
+            className="gap-2"
+          >
+            <PushPin size={18} weight="fill" />
+            <span>{groupsWithNewPins} group{groupsWithNewPins !== 1 ? 's' : ''} with pins</span>
+          </Button>
+        )}
         {!isMobile && (
           <button
             onClick={() => setActiveTab('settings')}
@@ -185,9 +204,9 @@ function App() {
                 <TabsTrigger value="groups" className="flex-col gap-1 data-[state=active]:text-primary relative">
                   <UsersThree size={24} weight="duotone" />
                   <span className="text-xs">Groups</span>
-                  {unreadGroupsCount > 0 && (
+                  {(unreadGroupsCount > 0 || groupsWithNewPins > 0) && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-primary">
-                      {unreadGroupsCount}
+                      {unreadGroupsCount > 0 ? (unreadGroupsCount > 9 ? '9+' : unreadGroupsCount) : groupsWithNewPins}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -249,9 +268,18 @@ function App() {
                 <TabsTrigger value="groups" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
                   <UsersThree size={24} weight="duotone" />
                   <span>Groups</span>
-                  {unreadGroupsCount > 0 && (
+                  {(unreadGroupsCount > 0 || groupsWithNewPins > 0) && (
                     <Badge className="ml-auto h-6 w-6 flex items-center justify-center p-0 text-xs bg-primary">
-                      {unreadGroupsCount}
+                      {unreadGroupsCount > 0 ? (unreadGroupsCount > 9 ? '9+' : unreadGroupsCount) : groupsWithNewPins}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="pinned-messages" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <PushPin size={24} weight="duotone" />
+                  <span>Pinned Messages</span>
+                  {groupsWithNewPins > 0 && (
+                    <Badge className="ml-auto h-6 w-6 flex items-center justify-center p-0 text-xs bg-accent">
+                      {groupsWithNewPins}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -295,6 +323,12 @@ function App() {
                 </TabsContent>
                 <TabsContent value="groups" className="mt-0 h-full">
                   <GroupDiscussionsView />
+                </TabsContent>
+                <TabsContent value="pinned-messages" className="mt-0 h-full">
+                  <PinnedMessagesView 
+                    onBack={() => setActiveTab('groups')}
+                    onNavigateToGroup={handleNavigateToGroup}
+                  />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
                   <SettingsView userProfile={userProfile!} />

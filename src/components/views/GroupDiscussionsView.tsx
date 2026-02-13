@@ -1,15 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useKV } from '@github/spark/hooks'
 import GroupDiscussionsList from '@/components/social/GroupDiscussionsList'
 import GroupDiscussionThread from '@/components/social/GroupDiscussionThread'
 import { UsersThree } from '@phosphor-icons/react'
 import { useIsMobile } from '@/hooks/use-mobile'
+import type { GroupDiscussion } from '@/lib/types'
 
 export default function GroupDiscussionsView() {
   const [selectedGroup, setSelectedGroup] = useState<{
     groupId: string
     groupName: string
   } | null>(null)
+  const [groups = []] = useKV<GroupDiscussion[]>('group-discussions', [])
   const isMobile = useIsMobile()
 
   const handleSelectGroup = (groupId: string, groupName: string) => {
