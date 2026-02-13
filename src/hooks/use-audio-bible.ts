@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useKV } from '@github/spark/hooks'
-import type { AudioNarrator, AudioPlaybackState, AudioPreferences, VerseUnit } from '@/lib/types'
+import type { AudioNarrator, AudioPlaybackState, AudioPreferences, VerseUnit, AudioPlaylist } from '@/lib/types'
 
 export function useAvailableVoices() {
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([])
@@ -83,14 +83,15 @@ export function useAudioNarrators(): AudioNarrator[] {
   return narrators.filter(n => n.voice !== null)
 }
 
-export function useAudioBible(verses: VerseUnit[]) {
+export function useAudioBible(verses: VerseUnit[], bookId?: string, chapter?: number) {
   const narrators = useAudioNarrators()
   const [audioPreferences, setAudioPreferences] = useKV<AudioPreferences>('audio-preferences', {
     defaultNarratorId: 'david-american',
     playbackRate: 1.0,
     volume: 0.8,
     autoAdvanceChapter: false,
-    highlightCurrentVerse: true
+    highlightCurrentVerse: true,
+    backgroundPlaybackEnabled: true
   })
 
   const [playbackState, setPlaybackState] = useState<AudioPlaybackState>({
@@ -103,8 +104,13 @@ export function useAudioBible(verses: VerseUnit[]) {
     autoAdvanceChapter: audioPreferences?.autoAdvanceChapter || false
   })
 
+  const [playlists] = useKV<AudioPlaylist[]>('audio-playlists', [])
+  const [currentPlaylist, setCurrentPlaylist] = useState<AudioPlaylist | null>(null)
+
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null)
   const currentVerseIndexRef = useRef<number>(0)
+  const sleepTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const wakeLockRef = useRef<any>(null)
 
   const currentNarrator = narrators.find(n => n.id === playbackState.narratorId) || narrators[0]
 
@@ -242,7 +248,9 @@ export function useAudioBible(verses: VerseUnit[]) {
       playbackRate: current?.playbackRate || 1.0,
       volume: current?.volume || 0.8,
       autoAdvanceChapter: current?.autoAdvanceChapter || false,
-      highlightCurrentVerse: current?.highlightCurrentVerse || true
+      highlightCurrentVerse: current?.highlightCurrentVerse || true,
+      backgroundPlaybackEnabled: current?.backgroundPlaybackEnabled ?? true,
+      sleepTimerDefault: current?.sleepTimerDefault
     }))
 
     if (wasPlaying && currentVerse > 0) {
@@ -261,7 +269,9 @@ export function useAudioBible(verses: VerseUnit[]) {
       playbackRate: rate,
       volume: current?.volume || 0.8,
       autoAdvanceChapter: current?.autoAdvanceChapter || false,
-      highlightCurrentVerse: current?.highlightCurrentVerse || true
+      highlightCurrentVerse: current?.highlightCurrentVerse || true,
+      backgroundPlaybackEnabled: current?.backgroundPlaybackEnabled ?? true,
+      sleepTimerDefault: current?.sleepTimerDefault
     }))
 
     if (utteranceRef.current) {
@@ -280,7 +290,9 @@ export function useAudioBible(verses: VerseUnit[]) {
       playbackRate: current?.playbackRate || 1.0,
       volume: volume,
       autoAdvanceChapter: current?.autoAdvanceChapter || false,
-      highlightCurrentVerse: current?.highlightCurrentVerse || true
+      highlightCurrentVerse: current?.highlightCurrentVerse || true,
+      backgroundPlaybackEnabled: current?.backgroundPlaybackEnabled ?? true,
+      sleepTimerDefault: current?.sleepTimerDefault
     }))
 
     if (utteranceRef.current) {
@@ -288,17 +300,125 @@ export function useAudioBible(verses: VerseUnit[]) {
     }
   }, [setAudioPreferences])
 
+  const setSleepTimer = useCallback((minutes: number | null) => {
+    if (sleepTimerRef.current) {
+      clearTimeout(sleepTimerRef.current)
+      sleepTimerRef.current = null
+    }
+
+    if (minutes === null || minutes === 0) {
+      setPlaybackState(prev => ({
+        ...prev,
+        sleepTimerMinutes: undefined,
+        sleepTimerEndTime: undefined
+      }))
+      return
+    }
+
+    const endTime = Date.now() + minutes * 60 * 1000
+    setPlaybackState(prev => ({
+      ...prev,
+      sleepTimerMinutes: minutes,
+      sleepTimerEndTime: endTime
+    }))
+
+    sleepTimerRef.current = setTimeout(() => {
+      stop()
+      setPlaybackState(prev => ({
+        ...prev,
+        sleepTimerMinutes: undefined,
+        sleepTimerEndTime: undefined
+      }))
+    }, minutes * 60 * 1000)
+  }, [stop])
+
+  const requestWakeLock = useCallback(async () => {
+    if ('wakeLock' in navigator && audioPreferences?.backgroundPlaybackEnabled) {
+      try {
+        wakeLockRef.current = await (navigator as any).wakeLock.request('screen')
+      } catch (err) {
+        console.log('Wake lock request failed:', err)
+      }
+    }
+  }, [audioPreferences?.backgroundPlaybackEnabled])
+
+  const releaseWakeLock = useCallback(() => {
+    if (wakeLockRef.current) {
+      wakeLockRef.current.release()
+      wakeLockRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (playbackState.isPlaying) {
+      requestWakeLock()
+    } else {
+      releaseWakeLock()
+    }
+  }, [playbackState.isPlaying, requestWakeLock, releaseWakeLock])
+
+  const loadPlaylist = useCallback((playlist: AudioPlaylist) => {
+    setCurrentPlaylist(playlist)
+    setPlaybackState(prev => ({
+      ...prev,
+      currentPlaylistId: playlist.id,
+      playlistPosition: 0
+    }))
+  }, [])
+
+  const nextInPlaylist = useCallback(() => {
+    if (!currentPlaylist || playbackState.playlistPosition === undefined) return null
+    
+    const nextPosition = playbackState.playlistPosition + 1
+    if (nextPosition < currentPlaylist.items.length) {
+      return currentPlaylist.items[nextPosition]
+    }
+    return null
+  }, [currentPlaylist, playbackState.playlistPosition])
+
+  const advancePlaylist = useCallback(() => {
+    if (!currentPlaylist || playbackState.playlistPosition === undefined) return
+    
+    const nextPosition = playbackState.playlistPosition + 1
+    if (nextPosition < currentPlaylist.items.length) {
+      setPlaybackState(prev => ({
+        ...prev,
+        playlistPosition: nextPosition
+      }))
+      
+      const nextItem = currentPlaylist.items[nextPosition]
+      const event = new CustomEvent('playlist-advance', {
+        detail: { bookId: nextItem.bookId, chapter: nextItem.chapter }
+      })
+      window.dispatchEvent(event)
+    } else {
+      stop()
+      setCurrentPlaylist(null)
+      setPlaybackState(prev => ({
+        ...prev,
+        currentPlaylistId: undefined,
+        playlistPosition: undefined
+      }))
+    }
+  }, [currentPlaylist, playbackState.playlistPosition, stop])
+
   useEffect(() => {
     return () => {
       window.speechSynthesis.cancel()
+      if (sleepTimerRef.current) {
+        clearTimeout(sleepTimerRef.current)
+      }
+      releaseWakeLock()
     }
-  }, [])
+  }, [releaseWakeLock])
 
   return {
     playbackState,
     currentNarrator,
     narrators,
     audioPreferences,
+    playlists,
+    currentPlaylist,
     play,
     pause,
     resume,
@@ -306,6 +426,10 @@ export function useAudioBible(verses: VerseUnit[]) {
     skipToVerse,
     setNarrator,
     setPlaybackRate,
-    setVolume
+    setVolume,
+    setSleepTimer,
+    loadPlaylist,
+    nextInPlaylist,
+    advancePlaylist
   }
 }

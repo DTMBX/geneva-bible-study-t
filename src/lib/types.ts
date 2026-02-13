@@ -490,6 +490,10 @@ export interface AudioPlaybackState {
   volume: number
   narratorId: string
   autoAdvanceChapter: boolean
+  sleepTimerMinutes?: number
+  sleepTimerEndTime?: number
+  currentPlaylistId?: string
+  playlistPosition?: number
 }
 
 export interface AudioPreferences {
@@ -498,4 +502,23 @@ export interface AudioPreferences {
   volume: number
   autoAdvanceChapter: boolean
   highlightCurrentVerse: boolean
+  sleepTimerDefault?: number
+  backgroundPlaybackEnabled: boolean
+}
+
+export interface AudioPlaylistItem {
+  bookId: string
+  bookName: string
+  chapter: number
+  translationId: string
+}
+
+export interface AudioPlaylist {
+  id: string
+  name: string
+  description?: string
+  items: AudioPlaylistItem[]
+  createdAt: number
+  updatedAt: number
+  isDefault?: boolean
 }

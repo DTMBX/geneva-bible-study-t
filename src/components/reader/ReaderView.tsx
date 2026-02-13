@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork, PaperPlaneTilt, SpeakerHigh, User } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork, PaperPlaneTilt, SpeakerHigh, User, ListPlus } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { bibleBooks } from '@/lib/data'
-import type { UserProfile, VerseUnit, PassageReference } from '@/lib/types'
+import type { UserProfile, VerseUnit, PassageReference, AudioPlaylist } from '@/lib/types'
 import { generateChapterVerses } from '@/lib/verse-generator'
 import ShareDialog from '@/components/social/ShareDialog'
 import ShareVerseWithFriendsDialog from '@/components/reader/ShareVerseWithFriendsDialog'
 import AudioPlayerControls from '@/components/reader/AudioPlayerControls'
 import NarratorSelectionDialog from '@/components/reader/NarratorSelectionDialog'
+import PlaylistDialog from '@/components/reader/PlaylistDialog'
 import { useAudioBible } from '@/hooks/use-audio-bible'
 
 interface ReaderViewProps {
@@ -26,6 +27,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [shareFriendsDialogOpen, setShareFriendsDialogOpen] = useState(false)
   const [narratorDialogOpen, setNarratorDialogOpen] = useState(false)
+  const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false)
   const [showAudioPlayer, setShowAudioPlayer] = useState(false)
   
   const [lastReadPosition, setLastReadPosition] = useKV<PassageReference>('last-read-position', {
@@ -44,6 +46,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     currentNarrator,
     narrators,
     audioPreferences,
+    currentPlaylist,
     play,
     pause,
     resume,
@@ -51,8 +54,11 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     skipToVerse,
     setNarrator,
     setPlaybackRate,
-    setVolume
-  } = useAudioBible(verses)
+    setVolume,
+    setSleepTimer,
+    loadPlaylist,
+    advancePlaylist
+  } = useAudioBible(verses, currentBookId, currentChapter)
 
   useEffect(() => {
     if (lastReadPosition) {
@@ -71,9 +77,23 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
       }
     }
 
+    const handlePlaylistAdvance = (event: Event) => {
+      const customEvent = event as CustomEvent<{ bookId: string; chapter: number }>
+      if (customEvent.detail) {
+        setCurrentBookId(customEvent.detail.bookId)
+        setCurrentChapter(customEvent.detail.chapter)
+        setSelectedVerses([])
+        setTimeout(() => play(), 500)
+      }
+    }
+
     window.addEventListener('navigate-to-passage', handleNavigateToPassage)
-    return () => window.removeEventListener('navigate-to-passage', handleNavigateToPassage)
-  }, [])
+    window.addEventListener('playlist-advance', handlePlaylistAdvance)
+    return () => {
+      window.removeEventListener('navigate-to-passage', handleNavigateToPassage)
+      window.removeEventListener('playlist-advance', handlePlaylistAdvance)
+    }
+  }, [play])
 
   useEffect(() => {
     setLastReadPosition((current) => ({
@@ -104,6 +124,9 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     if (currentBook && currentChapter < currentBook.chaptersCount) {
       setCurrentChapter(currentChapter + 1)
       setSelectedVerses([])
+      if (playbackState.currentPlaylistId) {
+        advancePlaylist()
+      }
     } else {
       const currentBookIndex = bibleBooks.findIndex(b => b.id === currentBookId)
       if (currentBookIndex < bibleBooks.length - 1) {
@@ -111,7 +134,21 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         setCurrentBookId(nextBook.id)
         setCurrentChapter(1)
         setSelectedVerses([])
+        if (playbackState.currentPlaylistId) {
+          advancePlaylist()
+        }
       }
+    }
+  }
+
+  const handlePlaylistSelect = (playlist: AudioPlaylist) => {
+    if (playlist.items.length > 0) {
+      loadPlaylist(playlist)
+      const firstItem = playlist.items[0]
+      setCurrentBookId(firstItem.bookId)
+      setCurrentChapter(firstItem.chapter)
+      setShowAudioPlayer(true)
+      setTimeout(() => play(), 500)
     }
   }
 
@@ -174,6 +211,13 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         currentNarratorId={playbackState.narratorId}
         onSelectNarrator={setNarrator}
       />
+      <PlaylistDialog
+        open={playlistDialogOpen}
+        onOpenChange={setPlaylistDialogOpen}
+        onPlaylistSelect={handlePlaylistSelect}
+        currentBookId={currentBookId}
+        currentChapter={currentChapter}
+      />
       <div className="border-b border-border bg-card px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           <Select value={currentBookId} onValueChange={handleBookChange}>
@@ -226,6 +270,15 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
             <User size={18} weight="duotone" />
             <span>Narrator</span>
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setPlaylistDialogOpen(true)}
+            className="gap-2 hidden sm:flex"
+          >
+            <ListPlus size={18} weight="duotone" />
+            <span>Playlists</span>
+          </Button>
           {selectedVerses.length > 0 && (
             <>
               <Button 
@@ -257,6 +310,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
             playbackState={playbackState}
             currentNarrator={currentNarrator}
             narrators={narrators}
+            currentPlaylist={currentPlaylist}
             onPlay={() => play()}
             onPause={pause}
             onResume={resume}
@@ -264,6 +318,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
             onNarratorChange={setNarrator}
             onPlaybackRateChange={setPlaybackRate}
             onVolumeChange={setVolume}
+            onSleepTimerSet={setSleepTimer}
+            onPlaylistOpen={() => setPlaylistDialogOpen(true)}
             totalVerses={verses.length}
           />
         </div>

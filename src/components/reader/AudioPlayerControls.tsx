@@ -1,16 +1,19 @@
-import { Play, Pause, Stop, SpeakerHigh, CaretRight, CaretLeft } from '@phosphor-icons/react'
+import { Play, Pause, Stop, SpeakerHigh, CaretRight, CaretLeft, Moon, Timer, ListPlus } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import type { AudioNarrator, AudioPlaybackState } from '@/lib/types'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import { useState, useEffect } from 'react'
+import type { AudioNarrator, AudioPlaybackState, AudioPlaylist } from '@/lib/types'
 
 interface AudioPlayerControlsProps {
   playbackState: AudioPlaybackState
   currentNarrator: AudioNarrator | undefined
   narrators: AudioNarrator[]
+  currentPlaylist?: AudioPlaylist | null
   onPlay: () => void
   onPause: () => void
   onResume: () => void
@@ -18,6 +21,8 @@ interface AudioPlayerControlsProps {
   onNarratorChange: (narratorId: string) => void
   onPlaybackRateChange: (rate: number) => void
   onVolumeChange: (volume: number) => void
+  onSleepTimerSet: (minutes: number | null) => void
+  onPlaylistOpen?: () => void
   totalVerses: number
 }
 
@@ -25,6 +30,7 @@ export default function AudioPlayerControls({
   playbackState,
   currentNarrator,
   narrators,
+  currentPlaylist,
   onPlay,
   onPause,
   onResume,
@@ -32,8 +38,33 @@ export default function AudioPlayerControls({
   onNarratorChange,
   onPlaybackRateChange,
   onVolumeChange,
+  onSleepTimerSet,
+  onPlaylistOpen,
   totalVerses
 }: AudioPlayerControlsProps) {
+  const [timeRemaining, setTimeRemaining] = useState<string>('')
+
+  useEffect(() => {
+    if (!playbackState.sleepTimerEndTime) {
+      setTimeRemaining('')
+      return
+    }
+
+    const interval = setInterval(() => {
+      const remaining = playbackState.sleepTimerEndTime! - Date.now()
+      if (remaining <= 0) {
+        setTimeRemaining('')
+        return
+      }
+
+      const minutes = Math.floor(remaining / 60000)
+      const seconds = Math.floor((remaining % 60000) / 1000)
+      setTimeRemaining(`${minutes}:${seconds.toString().padStart(2, '0')}`)
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [playbackState.sleepTimerEndTime])
+
   const handlePlayPause = () => {
     if (playbackState.isPlaying) {
       onPause()
@@ -43,6 +74,17 @@ export default function AudioPlayerControls({
       onPlay()
     }
   }
+
+  const sleepTimerOptions = [
+    { label: 'Off', value: null },
+    { label: '5 min', value: 5 },
+    { label: '10 min', value: 10 },
+    { label: '15 min', value: 15 },
+    { label: '30 min', value: 30 },
+    { label: '45 min', value: 45 },
+    { label: '60 min', value: 60 },
+    { label: '90 min', value: 90 }
+  ]
 
   return (
     <Card className="p-4 bg-card border-primary/20">
@@ -57,13 +99,26 @@ export default function AudioPlayerControls({
                   Verse {playbackState.currentVerseNumber} of {totalVerses}
                 </span>
               )}
+              {currentPlaylist && playbackState.playlistPosition !== undefined && (
+                <span className="text-xs text-accent font-medium">
+                  Playlist: {currentPlaylist.name} ({playbackState.playlistPosition + 1}/{currentPlaylist.items.length})
+                </span>
+              )}
             </div>
           </div>
-          {currentNarrator && (
-            <Badge variant="secondary" className="text-xs">
-              {currentNarrator.name}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {currentNarrator && (
+              <Badge variant="secondary" className="text-xs">
+                {currentNarrator.name}
+              </Badge>
+            )}
+            {timeRemaining && (
+              <Badge variant="default" className="text-xs gap-1">
+                <Moon size={12} weight="fill" />
+                {timeRemaining}
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -88,6 +143,45 @@ export default function AudioPlayerControls({
           >
             <Stop size={20} weight="fill" />
           </Button>
+
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={playbackState.sleepTimerEndTime ? "default" : "outline"}
+                size="icon"
+                title="Sleep Timer"
+              >
+                <Timer size={20} weight={playbackState.sleepTimerEndTime ? "fill" : "regular"} />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48">
+              <div className="flex flex-col gap-2">
+                <h4 className="font-semibold text-sm mb-2">Sleep Timer</h4>
+                {sleepTimerOptions.map((option) => (
+                  <Button
+                    key={option.label}
+                    variant={playbackState.sleepTimerMinutes === option.value ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => onSleepTimerSet(option.value)}
+                    className="justify-start"
+                  >
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {onPlaylistOpen && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onPlaylistOpen}
+              title="Playlists"
+            >
+              <ListPlus size={20} weight="duotone" />
+            </Button>
+          )}
 
           <Separator orientation="vertical" className="h-10 mx-2" />
 
@@ -155,6 +249,9 @@ export default function AudioPlayerControls({
         {currentNarrator && (
           <div className="text-xs text-muted-foreground pt-2 border-t border-border">
             {currentNarrator.description}
+            {playbackState.sleepTimerEndTime && (
+              <span className="ml-2 text-primary">• Audio will stop in {timeRemaining}</span>
+            )}
           </div>
         )}
       </div>
