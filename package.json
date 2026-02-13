@@ -1,8 +1,31 @@
 {
-    "name": "spark-template",
-    "private": true,
-    "version": "0.0.0",
+    "name": "geneva-bible-study",
+    "private": false,
+    "version": "1.0.0",
+    "description": "A scholarly, offline-capable Bible study application with multi-translation comparison, audio playback, reading plans, and social features",
     "type": "module",
+    "license": "MIT",
+    "author": "Your Name",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/YOUR_USERNAME/YOUR_REPO.git"
+    },
+    "bugs": {
+        "url": "https://github.com/YOUR_USERNAME/YOUR_REPO/issues"
+    },
+    "homepage": "https://YOUR_USERNAME.github.io/YOUR_REPO/",
+    "keywords": [
+        "bible",
+        "bible-study",
+        "geneva-bible",
+        "scripture",
+        "translation-comparison",
+        "reading-plan",
+        "audio-bible",
+        "offline",
+        "react",
+        "typescript"
+    ],
     "scripts": {
         "dev": "vite",
         "kill": "fuser -k 5000/tcp",
