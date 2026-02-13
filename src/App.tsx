@@ -34,6 +34,16 @@ function App() {
     }
   })
 
+  const handleNavigateToReader = (bookId: string, chapter: number) => {
+    setActiveTab('reader')
+    setTimeout(() => {
+      const event = new CustomEvent('navigate-to-passage', {
+        detail: { bookId, chapter }
+      })
+      window.dispatchEvent(event)
+    }, 100)
+  }
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-between">
@@ -62,16 +72,16 @@ function App() {
                   <BibleApiDemo />
                 </TabsContent>
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
+                  <HomeView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="reader" className="mt-0 h-full">
-                  <ReaderView userProfile={userProfile} />
+                  <ReaderView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="library" className="mt-0 h-full">
                   <LibraryView />
                 </TabsContent>
                 <TabsContent value="compare" className="mt-0 h-full">
-                  <CompareView userProfile={userProfile} />
+                  <CompareView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="search" className="mt-0 h-full">
                   <SearchView />
@@ -79,8 +89,11 @@ function App() {
                 <TabsContent value="timeline" className="mt-0 h-full">
                   <TimelineView />
                 </TabsContent>
+                <TabsContent value="reading-plan" className="mt-0 h-full">
+                  <ReadingPlanView onNavigateToReader={handleNavigateToReader} />
+                </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
-                  <SettingsView userProfile={userProfile} />
+                  <SettingsView userProfile={userProfile!} />
                 </TabsContent>
               </div>
 
@@ -162,16 +175,16 @@ function App() {
                   <BibleApiDemo />
                 </TabsContent>
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
+                  <HomeView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="reader" className="mt-0 h-full">
-                  <ReaderView userProfile={userProfile} />
+                  <ReaderView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="library" className="mt-0 h-full">
                   <LibraryView />
                 </TabsContent>
                 <TabsContent value="compare" className="mt-0 h-full">
-                  <CompareView userProfile={userProfile} />
+                  <CompareView userProfile={userProfile!} />
                 </TabsContent>
                 <TabsContent value="search" className="mt-0 h-full">
                   <SearchView />
@@ -180,10 +193,10 @@ function App() {
                   <TimelineView />
                 </TabsContent>
                 <TabsContent value="reading-plan" className="mt-0 h-full">
-                  <ReadingPlanView />
+                  <ReadingPlanView onNavigateToReader={handleNavigateToReader} />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
-                  <SettingsView userProfile={userProfile} />
+                  <SettingsView userProfile={userProfile!} />
                 </TabsContent>
               </div>
             </div>

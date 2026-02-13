@@ -36,6 +36,20 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   }, [])
 
   useEffect(() => {
+    const handleNavigateToPassage = (event: Event) => {
+      const customEvent = event as CustomEvent<{ bookId: string; chapter: number }>
+      if (customEvent.detail) {
+        setCurrentBookId(customEvent.detail.bookId)
+        setCurrentChapter(customEvent.detail.chapter)
+        setSelectedVerses([])
+      }
+    }
+
+    window.addEventListener('navigate-to-passage', handleNavigateToPassage)
+    return () => window.removeEventListener('navigate-to-passage', handleNavigateToPassage)
+  }, [])
+
+  useEffect(() => {
     setLastReadPosition((current) => ({
       workId: currentBookId,
       chapterNumber: currentChapter,

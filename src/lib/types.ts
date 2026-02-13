@@ -198,6 +198,9 @@ export interface ReadingPlan {
   duration: number
   category: 'chronological' | 'canonical' | 'thematic' | 'devotional' | 'custom'
   days: ReadingPlanDay[]
+  isCustom?: boolean
+  createdBy?: string
+  createdAt?: number
 }
 
 export interface UserReadingPlan {
@@ -209,4 +212,15 @@ export interface UserReadingPlan {
   completedDays: number[]
   paused: boolean
   notes: Record<number, string>
+  reminderEnabled?: boolean
+  reminderTime?: string
+  lastReminderSent?: number
+}
+
+export interface NotificationSettings {
+  enabled: boolean
+  dailyReminderTime: string
+  soundEnabled: boolean
+  desktopNotifications: boolean
+  missedDayReminders: boolean
 }

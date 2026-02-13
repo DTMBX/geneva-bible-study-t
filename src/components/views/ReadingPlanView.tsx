@@ -4,29 +4,54 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Calendar, CheckCircle, Circle, BookOpen, Play, Pause, ArrowCounterClockwise, CalendarBlank, ListChecks } from '@phosphor-icons/react'
+import { Calendar, CheckCircle, Circle, BookOpen, Play, Pause, ArrowCounterClockwise, CalendarBlank, ListChecks, Plus, Bell, Trash } from '@phosphor-icons/react'
 import { readingPlans, getBookDisplayName } from '@/lib/reading-plans'
 import type { UserReadingPlan, ReadingPlan } from '@/lib/types'
 import { toast } from 'sonner'
+import CustomPlanBuilder from './CustomPlanBuilder'
+import NotificationSettingsPanel from './NotificationSettingsPanel'
 
-export default function ReadingPlanView() {
+interface ReadingPlanViewProps {
+  onNavigateToReader?: (bookId: string, chapter: number) => void
+}
+
+export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewProps) {
   const [activeUserPlans = [], setActiveUserPlans] = useKV<UserReadingPlan[]>('user-reading-plans', [])
+  const [customPlans = [], setCustomPlans] = useKV<ReadingPlan[]>('custom-reading-plans', [])
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
-  const [showPlanSelector, setShowPlanSelector] = useState(false)
+  const [showCustomPlanBuilder, setShowCustomPlanBuilder] = useState(false)
+  const [showNotifications, setShowNotifications] = useState(false)
 
+  const allPlans = [...readingPlans, ...(customPlans || [])]
   const selectedUserPlan = activeUserPlans?.find(p => p.planId === selectedPlanId)
-  const selectedPlan = readingPlans.find(p => p.id === selectedPlanId)
+  const selectedPlan = allPlans.find(p => p.id === selectedPlanId)
+
+  const handleCreateCustomPlan = (plan: ReadingPlan) => {
+    setCustomPlans((current) => [...(current || []), plan])
+    setShowCustomPlanBuilder(false)
+    toast.success('Custom plan created! Start it from the available plans.')
+  }
+
+  const handleDeleteCustomPlan = (planId: string) => {
+    if (!confirm('Delete this custom plan? This cannot be undone.')) return
+    
+    setCustomPlans((current) => (current || []).filter(p => p.id !== planId))
+    setActiveUserPlans((current) => (current || []).filter(p => p.planId !== planId))
+    
+    if (selectedPlanId === planId) {
+      setSelectedPlanId(null)
+    }
+    
+    toast.success('Custom plan deleted')
+  }
 
   const startPlan = (planId: string) => {
     const existingPlan = activeUserPlans?.find(p => p.planId === planId)
     
     if (existingPlan) {
       setSelectedPlanId(planId)
-      setShowPlanSelector(false)
       toast.success('Resumed reading plan')
       return
     }
@@ -39,13 +64,24 @@ export default function ReadingPlanView() {
       currentDay: 1,
       completedDays: [],
       paused: false,
-      notes: {}
+      notes: {},
+      reminderEnabled: false
     }
 
     setActiveUserPlans(current => [...(current || []), newUserPlan])
     setSelectedPlanId(planId)
-    setShowPlanSelector(false)
     toast.success('Reading plan started!')
+  }
+
+  const openTodaysReading = () => {
+    if (!selectedPlan || !selectedUserPlan || !onNavigateToReader) return
+    
+    const currentDayReading = getCurrentDayReading()
+    if (!currentDayReading || currentDayReading.readings.length === 0) return
+    
+    const firstReading = currentDayReading.readings[0]
+    onNavigateToReader(firstReading.workId, firstReading.chapterNumber)
+    toast.success('Opening today\'s reading in Bible Reader')
   }
 
   const markDayComplete = (day: number) => {
@@ -143,7 +179,7 @@ export default function ReadingPlanView() {
             </h2>
             <div className="grid gap-4 md:grid-cols-2">
               {activeUserPlans.map(userPlan => {
-                const plan = readingPlans.find(p => p.id === userPlan.planId)
+                const plan = allPlans.find(p => p.id === userPlan.planId)
                 if (!plan) return null
                 
                 const progress = (userPlan.completedDays.length / plan.duration) * 100
@@ -194,11 +230,28 @@ export default function ReadingPlanView() {
             <h2 className="text-2xl font-semibold" style={{ fontFamily: 'var(--font-heading)' }}>
               Available Plans
             </h2>
+            <div className="flex gap-2">
+              <Button onClick={() => setShowNotifications(!showNotifications)} variant="outline" size="sm">
+                <Bell size={16} className="mr-2" />
+                Reminders
+              </Button>
+              <Button onClick={() => setShowCustomPlanBuilder(true)} variant="default" size="sm">
+                <Plus size={16} className="mr-2" />
+                Create Custom Plan
+              </Button>
+            </div>
           </div>
+
+          {showNotifications && (
+            <div className="mb-6">
+              <NotificationSettingsPanel />
+            </div>
+          )}
           
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {readingPlans.map(plan => {
+            {allPlans.map(plan => {
               const isActive = activeUserPlans.some(up => up.planId === plan.id)
+              const isCustom = plan.isCustom
               
               return (
                 <Card key={plan.id} className="flex flex-col">
@@ -207,7 +260,22 @@ export default function ReadingPlanView() {
                       <Badge variant={plan.category === 'chronological' ? 'default' : 'secondary'}>
                         {plan.category}
                       </Badge>
-                      <Badge variant="outline">{plan.duration} days</Badge>
+                      <div className="flex gap-2 items-center">
+                        <Badge variant="outline">{plan.duration} days</Badge>
+                        {isCustom && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteCustomPlan(plan.id)
+                            }}
+                          >
+                            <Trash size={14} />
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <CardTitle className="text-xl">{plan.name}</CardTitle>
                     <CardDescription>{plan.description}</CardDescription>
@@ -323,30 +391,45 @@ export default function ReadingPlanView() {
           <CardContent>
             <div className="space-y-3">
               {currentDayReading.readings.map((reading, idx) => (
-                <div key={idx} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg">
+                <div key={idx} className="flex items-center gap-3 p-3 bg-muted/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                  onClick={() => onNavigateToReader && onNavigateToReader(reading.workId, reading.chapterNumber)}
+                >
                   <Circle size={20} className="text-muted-foreground" />
-                  <span className="font-medium" style={{ fontFamily: 'var(--font-body)' }}>
+                  <span className="font-medium flex-1" style={{ fontFamily: 'var(--font-body)' }}>
                     {getBookDisplayName(reading.workId)} {reading.chapterNumber}
                   </span>
+                  <BookOpen size={18} className="text-muted-foreground" />
                 </div>
               ))}
-              <Button 
-                onClick={() => markDayComplete(currentDayReading.day)}
-                className="w-full mt-4"
-                disabled={selectedUserPlan.completedDays.includes(currentDayReading.day)}
-              >
-                {selectedUserPlan.completedDays.includes(currentDayReading.day) ? (
-                  <>
-                    <CheckCircle size={20} weight="fill" className="mr-2" />
-                    Completed
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle size={20} className="mr-2" />
-                    Mark Complete
-                  </>
+              <div className="grid grid-cols-2 gap-3 mt-4">
+                {onNavigateToReader && currentDayReading.readings.length > 0 && (
+                  <Button 
+                    onClick={openTodaysReading}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    <BookOpen size={20} className="mr-2" />
+                    Open in Reader
+                  </Button>
                 )}
-              </Button>
+                <Button 
+                  onClick={() => markDayComplete(currentDayReading.day)}
+                  className={onNavigateToReader ? "w-full" : "w-full col-span-2"}
+                  disabled={selectedUserPlan.completedDays.includes(currentDayReading.day)}
+                >
+                  {selectedUserPlan.completedDays.includes(currentDayReading.day) ? (
+                    <>
+                      <CheckCircle size={20} weight="fill" className="mr-2" />
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle size={20} className="mr-2" />
+                      Mark Complete
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -438,6 +521,12 @@ export default function ReadingPlanView() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <CustomPlanBuilder
+        open={showCustomPlanBuilder}
+        onClose={() => setShowCustomPlanBuilder(false)}
+        onCreatePlan={handleCreateCustomPlan}
+      />
     </div>
   )
 }
