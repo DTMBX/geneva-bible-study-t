@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Share, BookmarkSimple, Copy, Check, ChatCircle, UsersThree, Heart } from '@phosphor-icons/react'
+import { Share, BookmarkSimple, Copy, Check, ChatCircle, UsersThree, Heart, BookOpen } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -55,7 +55,7 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
     setIsLoading(true)
     try {
       const today = new Date().toISOString().split('T')[0]
-      const [cachedVerse] = await window.spark.kv.get<VerseOfTheDayData>(`verse-of-day-${today}`) as any
+      const cachedVerse = await window.spark.kv.get<VerseOfTheDayData>(`verse-of-day-${today}`)
 
       if (cachedVerse) {
         setVerseData(cachedVerse)
@@ -63,52 +63,102 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
         return
       }
 
-      const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
-      
-      const inspirationalVerses = [
-        { bookId: 'jhn', chapter: 3, verse: 16 },
-        { bookId: 'psa', chapter: 23, verse: 1 },
-        { bookId: 'pro', chapter: 3, verse: 5 },
-        { bookId: 'isa', chapter: 41, verse: 10 },
-        { bookId: 'mat', chapter: 6, verse: 33 },
-        { bookId: 'rom', chapter: 8, verse: 28 },
-        { bookId: 'php', chapter: 4, verse: 13 },
-        { bookId: 'jer', chapter: 29, verse: 11 },
-        { bookId: '1co', chapter: 13, verse: 4 },
-        { bookId: 'psa', chapter: 46, verse: 1 },
-        { bookId: 'mat', chapter: 11, verse: 28 },
-        { bookId: 'isa', chapter: 40, verse: 31 },
-        { bookId: 'rom', chapter: 12, verse: 2 },
-        { bookId: 'eph', chapter: 2, verse: 8 },
-        { bookId: 'psa', chapter: 119, verse: 105 },
-        { bookId: '2ti', chapter: 1, verse: 7 },
-        { bookId: 'heb', chapter: 11, verse: 1 },
-        { bookId: 'jas', chapter: 1, verse: 2 },
-        { bookId: '1pe', chapter: 5, verse: 7 },
-        { bookId: 'rev', chapter: 21, verse: 4 },
-        { bookId: 'psa', chapter: 27, verse: 1 },
-        { bookId: 'pro', chapter: 16, verse: 3 },
-        { bookId: 'mat', chapter: 5, verse: 16 },
-        { bookId: 'jhn', chapter: 14, verse: 6 },
-        { bookId: 'gal', chapter: 5, verse: 22 },
-        { bookId: 'col', chapter: 3, verse: 23 },
-        { bookId: '1jn', chapter: 4, verse: 19 },
-        { bookId: 'psa', chapter: 37, verse: 4 },
-        { bookId: 'isa', chapter: 26, verse: 3 },
-        { bookId: 'mic', chapter: 6, verse: 8 }
-      ]
-
-      const selectedVerse = inspirationalVerses[dayOfYear % inspirationalVerses.length]
       const translation = userProfile?.preferences?.defaultTranslation || 'kjv'
+      let verseResult: { text: string } | null = null
+      let selectedVerse: { bookId: string; chapter: number; verse: number } | null = null
 
-      const verseResult = await fetchVerse({
-        translationId: translation,
-        bookId: selectedVerse.bookId,
-        chapter: selectedVerse.chapter,
-        verse: selectedVerse.verse
-      })
+      try {
+        const response = await fetch('https://beta.ourmanna.com/api/v1/get/?format=json')
+        const data = await response.json()
+        
+        if (data?.verse?.details?.reference) {
+          const reference = data.verse.details.reference
+          const match = reference.match(/^(\d?\s?[A-Za-z]+)\s+(\d+):(\d+)/)
+          
+          if (match) {
+            const bookName = match[1].trim()
+            const chapter = parseInt(match[2])
+            const verse = parseInt(match[3])
+            
+            const bookMapping: Record<string, string> = {
+              'Genesis': 'gen', 'Exodus': 'exo', 'Leviticus': 'lev', 'Numbers': 'num', 'Deuteronomy': 'deu',
+              'Joshua': 'jos', 'Judges': 'jdg', 'Ruth': 'rut', '1 Samuel': '1sa', '2 Samuel': '2sa',
+              '1 Kings': '1ki', '2 Kings': '2ki', '1 Chronicles': '1ch', '2 Chronicles': '2ch',
+              'Ezra': 'ezr', 'Nehemiah': 'neh', 'Esther': 'est', 'Job': 'job', 'Psalms': 'psa', 'Psalm': 'psa',
+              'Proverbs': 'pro', 'Ecclesiastes': 'ecc', 'Song of Solomon': 'sng', 'Isaiah': 'isa',
+              'Jeremiah': 'jer', 'Lamentations': 'lam', 'Ezekiel': 'ezk', 'Daniel': 'dan', 'Hosea': 'hos',
+              'Joel': 'jol', 'Amos': 'amo', 'Obadiah': 'oba', 'Jonah': 'jon', 'Micah': 'mic', 'Nahum': 'nam',
+              'Habakkuk': 'hab', 'Zephaniah': 'zep', 'Haggai': 'hag', 'Zechariah': 'zec', 'Malachi': 'mal',
+              'Matthew': 'mat', 'Mark': 'mrk', 'Luke': 'luk', 'John': 'jhn', 'Acts': 'act', 'Romans': 'rom',
+              '1 Corinthians': '1co', '2 Corinthians': '2co', 'Galatians': 'gal', 'Ephesians': 'eph',
+              'Philippians': 'php', 'Colossians': 'col', '1 Thessalonians': '1th', '2 Thessalonians': '2th',
+              '1 Timothy': '1ti', '2 Timothy': '2ti', 'Titus': 'tit', 'Philemon': 'phm', 'Hebrews': 'heb',
+              'James': 'jas', '1 Peter': '1pe', '2 Peter': '2pe', '1 John': '1jn', '2 John': '2jn',
+              '3 John': '3jn', 'Jude': 'jud', 'Revelation': 'rev'
+            }
+            
+            const bookId = bookMapping[bookName]
+            if (bookId) {
+              selectedVerse = { bookId, chapter, verse }
+              verseResult = await fetchVerse({
+                translationId: translation,
+                bookId,
+                chapter,
+                verse
+              })
+            }
+          }
+        }
+      } catch (apiError) {
+        console.log('Daily verse API unavailable, using fallback')
+      }
 
-      if (!verseResult) {
+      if (!verseResult || !selectedVerse) {
+        const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+        
+        const inspirationalVerses = [
+          { bookId: 'jhn', chapter: 3, verse: 16 },
+          { bookId: 'psa', chapter: 23, verse: 1 },
+          { bookId: 'pro', chapter: 3, verse: 5 },
+          { bookId: 'isa', chapter: 41, verse: 10 },
+          { bookId: 'mat', chapter: 6, verse: 33 },
+          { bookId: 'rom', chapter: 8, verse: 28 },
+          { bookId: 'php', chapter: 4, verse: 13 },
+          { bookId: 'jer', chapter: 29, verse: 11 },
+          { bookId: '1co', chapter: 13, verse: 4 },
+          { bookId: 'psa', chapter: 46, verse: 1 },
+          { bookId: 'mat', chapter: 11, verse: 28 },
+          { bookId: 'isa', chapter: 40, verse: 31 },
+          { bookId: 'rom', chapter: 12, verse: 2 },
+          { bookId: 'eph', chapter: 2, verse: 8 },
+          { bookId: 'psa', chapter: 119, verse: 105 },
+          { bookId: '2ti', chapter: 1, verse: 7 },
+          { bookId: 'heb', chapter: 11, verse: 1 },
+          { bookId: 'jas', chapter: 1, verse: 2 },
+          { bookId: '1pe', chapter: 5, verse: 7 },
+          { bookId: 'rev', chapter: 21, verse: 4 },
+          { bookId: 'psa', chapter: 27, verse: 1 },
+          { bookId: 'pro', chapter: 16, verse: 3 },
+          { bookId: 'mat', chapter: 5, verse: 16 },
+          { bookId: 'jhn', chapter: 14, verse: 6 },
+          { bookId: 'gal', chapter: 5, verse: 22 },
+          { bookId: 'col', chapter: 3, verse: 23 },
+          { bookId: '1jn', chapter: 4, verse: 19 },
+          { bookId: 'psa', chapter: 37, verse: 4 },
+          { bookId: 'isa', chapter: 26, verse: 3 },
+          { bookId: 'mic', chapter: 6, verse: 8 }
+        ]
+
+        selectedVerse = inspirationalVerses[dayOfYear % inspirationalVerses.length]
+        verseResult = await fetchVerse({
+          translationId: translation,
+          bookId: selectedVerse.bookId,
+          chapter: selectedVerse.chapter,
+          verse: selectedVerse.verse
+        })
+      }
+
+      if (!verseResult || !selectedVerse) {
         throw new Error('Failed to fetch verse')
       }
 
@@ -214,18 +264,25 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
 
   if (isLoading) {
     return (
-      <Card className="border-l-4 border-l-accent">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-xl">
-            <BookmarkSimple size={24} weight="duotone" className="text-accent" />
-            Verse of the Day
+      <Card className="border-2 border-accent/50 shadow-xl bg-gradient-to-br from-card to-accent/5">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-3 text-2xl">
+            <div className="p-2 rounded-lg bg-accent/20">
+              <BookmarkSimple size={28} weight="duotone" className="text-accent" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold">Verse of the Day</div>
+              <div className="text-sm font-normal text-muted-foreground mt-1">
+                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+              </div>
+            </div>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <div className="space-y-3 animate-pulse">
-            <div className="h-4 bg-muted rounded w-full" />
-            <div className="h-4 bg-muted rounded w-5/6" />
-            <div className="h-4 bg-muted rounded w-4/6" />
+            <div className="h-6 bg-muted rounded w-full" />
+            <div className="h-6 bg-muted rounded w-5/6" />
+            <div className="h-6 bg-muted rounded w-4/6" />
           </div>
         </CardContent>
       </Card>
@@ -240,45 +297,47 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
 
   return (
     <>
-      <Card className="border-l-4 border-l-accent hover:shadow-lg transition-all">
-        <CardHeader>
-          <div className="flex items-start justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2 text-xl">
-                <BookmarkSimple size={24} weight="duotone" className="text-accent" />
-                Verse of the Day
-              </CardTitle>
-              <p className="text-sm text-muted-foreground mt-1">
-                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-              </p>
+      <Card className="border-2 border-accent/50 shadow-xl bg-gradient-to-br from-card to-accent/5 hover:shadow-2xl transition-all">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1">
+              <div className="p-2 rounded-lg bg-accent/20">
+                <BookmarkSimple size={28} weight="duotone" className="text-accent" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl font-bold">Verse of the Day</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
+              </div>
             </div>
             <Button
               variant="ghost"
               size="icon"
               onClick={handleLike}
-              className="text-accent hover:text-accent"
+              className="text-accent hover:text-accent shrink-0"
             >
               {isLiked ? (
-                <Heart size={24} weight="fill" className="text-accent" />
+                <Heart size={28} weight="fill" className="text-accent" />
               ) : (
-                <Heart size={24} weight="duotone" />
+                <Heart size={28} weight="duotone" />
               )}
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-5">
           <div 
-            className="text-lg leading-relaxed cursor-pointer hover:text-accent transition-colors"
-            style={{ fontFamily: 'var(--font-body)' }}
+            className="text-xl leading-relaxed cursor-pointer hover:text-accent transition-colors py-4 px-2"
+            style={{ fontFamily: 'var(--font-body)', lineHeight: '1.8' }}
             onClick={handleReadInContext}
           >
             "{verseData.text}"
           </div>
           
-          <div className="flex items-center justify-between">
-            <div className="text-sm font-medium text-primary">
+          <div className="flex items-center justify-between py-2 px-2">
+            <div className="text-base font-semibold text-primary">
               {book?.title} {verseData.chapter}:{verseData.verse}
-              <span className="ml-2 text-muted-foreground">({verseData.translation.toUpperCase()})</span>
+              <span className="ml-3 text-sm text-muted-foreground font-normal">({verseData.translation.toUpperCase()})</span>
             </div>
           </div>
 
@@ -287,41 +346,42 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
           <div className="flex gap-2 flex-wrap">
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={handleCopyVerse}
               className="gap-2"
             >
-              {copied ? <Check size={16} /> : <Copy size={16} />}
-              {copied ? 'Copied!' : 'Copy'}
+              {copied ? <Check size={18} /> : <Copy size={18} />}
+              {copied ? 'Copied!' : 'Copy Verse'}
             </Button>
             
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={handleBookmark}
               className="gap-2"
             >
-              <BookmarkSimple size={16} weight="duotone" />
+              <BookmarkSimple size={18} weight="duotone" />
               Bookmark
             </Button>
             
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={() => setShareDialogOpen(true)}
               className="gap-2"
             >
-              <Share size={16} weight="duotone" />
+              <Share size={18} weight="duotone" />
               Share
             </Button>
 
             {onNavigateToReader && (
               <Button
                 variant="default"
-                size="sm"
+                size="default"
                 onClick={handleReadInContext}
                 className="gap-2 ml-auto"
               >
+                <BookOpen size={18} weight="duotone" />
                 Read in Context
               </Button>
             )}

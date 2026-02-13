@@ -21,7 +21,7 @@ export default function HomeView({ userProfile, onNavigateToReader, onNavigateTo
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8">
+      <div className="mb-6">
         <h2 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: 'var(--font-heading)' }}>
           Welcome to the Geneva Bible
         </h2>
