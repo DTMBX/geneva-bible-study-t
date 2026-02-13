@@ -305,7 +305,8 @@ export default function GroupDiscussionThread({
     toast.success('Message deleted')
   }
 
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '??'
     return name
       .split(' ')
       .map(n => n[0])

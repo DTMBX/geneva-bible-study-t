@@ -44,7 +44,7 @@ export default function InviteMembersDialog({
   }, [])
 
   const availableFriends = friends.filter(
-    friend => !group.memberIds.includes(friend.userId)
+    friend => !group?.memberIds?.includes(friend.userId)
   ).filter(
     friend =>
       searchQuery === '' ||
@@ -95,13 +95,18 @@ export default function InviteMembersDialog({
     )
   }
 
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '??'
     return name
       .split(' ')
       .map(n => n[0])
       .join('')
       .toUpperCase()
       .slice(0, 2)
+  }
+
+  if (!group) {
+    return null
   }
 
   return (

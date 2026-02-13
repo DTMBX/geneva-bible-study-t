@@ -112,7 +112,8 @@ export default function PinnedMessagesView({
     return isAdmin || isModerator
   }
 
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '??'
     return name
       .split(' ')
       .map(n => n[0])

@@ -31,7 +31,8 @@ export default function GroupInfoDialog({
 }: GroupInfoDialogProps) {
   const [showPermissions, setShowPermissions] = useState(false)
 
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '??'
     return name
       .split(' ')
       .map(n => n[0])
@@ -69,6 +70,10 @@ export default function GroupInfoDialog({
       member: ''
     }
     return role !== 'member' ? colors[role] : ''
+  }
+
+  if (!group) {
+    return null
   }
 
   return (

@@ -59,11 +59,11 @@ export default function GroupAdminSettingsDialog({
   currentUserId
 }: GroupAdminSettingsDialogProps) {
   const [groups = [], setGroups] = useKV<GroupDiscussion[]>('group-discussions', [])
-  const [settings, setSettings] = useState(group.settings)
+  const [settings, setSettings] = useState(group?.settings || { allowInvites: false, anyoneCanPost: true, moderationEnabled: false })
   const [confirmRemove, setConfirmRemove] = useState<{ userId: string; userName: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
-  const currentUserRole = getUserRole(group, currentUserId)
+  const currentUserRole = group ? getUserRole(group, currentUserId) : 'member'
   const canChangeUserRoles = canChangeRoles(currentUserRole)
   const canRemoveUsers = canRemoveMembers(currentUserRole)
   const canDeleteGroupPermission = canDeleteGroup(currentUserRole)
@@ -126,7 +126,8 @@ export default function GroupAdminSettingsDialog({
     onOpenChange(false)
   }
 
-  const getInitials = (name: string) => {
+  const getInitials = (name?: string) => {
+    if (!name) return '??'
     return name
       .split(' ')
       .map(n => n[0])
@@ -144,6 +145,10 @@ export default function GroupAdminSettingsDialog({
       default:
         return <User size={16} weight="fill" className="text-muted-foreground" />
     }
+  }
+
+  if (!group) {
+    return null
   }
 
   return (
