@@ -9,13 +9,15 @@ import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck, Bell, Keyboard } from '@phosphor-icons/react'
+import { Input } from '@/components/ui/input'
+import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck, Bell, Keyboard, MapPin, SunHorizon, Clock } from '@phosphor-icons/react'
 import { translations } from '@/lib/data'
 import type { UserProfile } from '@/lib/types'
 import CommunityProfileSettings from '@/components/social/CommunityProfileSettings'
 import ModeratorTestPanel from '@/components/social/ModeratorTestPanel'
 import VerseOfDayNotifications from './VerseOfDayNotifications'
 import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog'
+import { useAutoDarkMode, formatSunTime, type DarkModeSchedule } from '@/hooks/use-auto-dark-mode'
 
 interface SettingsViewProps {
   userProfile: UserProfile
@@ -24,6 +26,7 @@ interface SettingsViewProps {
 export default function SettingsView({ userProfile: initialProfile }: SettingsViewProps) {
   const [userProfile, setUserProfile] = useKV<UserProfile>('user-profile', initialProfile)
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
+  const { settings: darkModeSettings, updateSettings: updateDarkModeSettings } = useAutoDarkMode()
 
   const updatePreference = <K extends keyof UserProfile['preferences']>(
     key: K,
@@ -37,6 +40,23 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
       }
     }))
   }
+
+  const handleDarkModeScheduleChange = (mode: DarkModeSchedule) => {
+    updateDarkModeSettings(current => ({
+      ...current!,
+      mode
+    }))
+  }
+
+  const handleScheduledTimeChange = (type: 'start' | 'end', value: string) => {
+    updateDarkModeSettings(current => ({
+      ...current!,
+      [type === 'start' ? 'scheduledStart' : 'scheduledEnd']: value
+    }))
+  }
+
+  const sunriseTime = formatSunTime(darkModeSettings || { mode: 'manual' }, 'sunrise')
+  const sunsetTime = formatSunTime(darkModeSettings || { mode: 'manual' }, 'sunset')
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
@@ -175,24 +195,163 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Moon size={24} weight="duotone" className="text-primary" />
-              Appearance
+              Dark Mode & Scheduling
             </CardTitle>
             <CardDescription>
-              Dark mode and display settings for comfortable reading
+              Configure automatic dark mode based on time or location
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Dark Mode</Label>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Dark Mode Schedule</Label>
+                <Select
+                  value={darkModeSettings?.mode || 'manual'}
+                  onValueChange={handleDarkModeScheduleChange}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="manual">
+                      <div className="flex items-center gap-2">
+                        <Moon size={16} weight="duotone" />
+                        <span>Manual - Toggle manually</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="auto">
+                      <div className="flex items-center gap-2">
+                        <SunHorizon size={16} weight="duotone" />
+                        <span>Automatic - Sunset to sunrise</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="scheduled">
+                      <div className="flex items-center gap-2">
+                        <Clock size={16} weight="duotone" />
+                        <span>Scheduled - Custom times</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
                 <p className="text-sm text-muted-foreground">
-                  Switch to dark theme for reading comfort in low light conditions. Changes apply immediately across the entire app.
+                  Choose how dark mode should be activated
                 </p>
               </div>
-              <Switch
-                checked={userProfile?.preferences.nightMode}
-                onCheckedChange={(checked) => updatePreference('nightMode', checked)}
-              />
+
+              {darkModeSettings?.mode === 'manual' && (
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Dark Mode</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Manually toggle dark theme on/off
+                      </p>
+                    </div>
+                    <Switch
+                      checked={userProfile?.preferences.nightMode}
+                      onCheckedChange={(checked) => updatePreference('nightMode', checked)}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {darkModeSettings?.mode === 'auto' && (
+                <div className="p-4 bg-muted/50 rounded-md space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin size={16} weight="duotone" className="text-primary" />
+                    <span className="font-medium">Location-Based Scheduling</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Dark mode will automatically activate at sunset and deactivate at sunrise based on your location.
+                  </p>
+                  {darkModeSettings.latitude && darkModeSettings.longitude && (
+                    <div className="space-y-2 pt-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Today's sunrise:</span>
+                        <Badge variant="secondary" className="gap-1">
+                          <SunHorizon size={14} weight="duotone" />
+                          {sunriseTime || 'Calculating...'}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-muted-foreground">Today's sunset:</span>
+                        <Badge variant="secondary" className="gap-1">
+                          <SunHorizon size={14} weight="duotone" />
+                          {sunsetTime || 'Calculating...'}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground pt-2">
+                        Location: {darkModeSettings.latitude.toFixed(4)}°, {darkModeSettings.longitude.toFixed(4)}°
+                      </p>
+                    </div>
+                  )}
+                  {(!darkModeSettings.latitude || !darkModeSettings.longitude) && (
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2">
+                      <MapPin size={14} weight="duotone" />
+                      <span>Requesting location permission...</span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {darkModeSettings?.mode === 'scheduled' && (
+                <div className="p-4 bg-muted/50 rounded-md space-y-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock size={16} weight="duotone" className="text-primary" />
+                    <span className="font-medium">Custom Time Schedule</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Set specific times when dark mode should be active each day.
+                  </p>
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="dark-mode-start">Start Time</Label>
+                      <Input
+                        id="dark-mode-start"
+                        type="time"
+                        value={darkModeSettings.scheduledStart || '20:00'}
+                        onChange={(e) => handleScheduledTimeChange('start', e.target.value)}
+                        className="font-mono"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Dark mode begins
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dark-mode-end">End Time</Label>
+                      <Input
+                        id="dark-mode-end"
+                        type="time"
+                        value={darkModeSettings.scheduledEnd || '07:00'}
+                        onChange={(e) => handleScheduledTimeChange('end', e.target.value)}
+                        className="font-mono"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Dark mode ends
+                      </p>
+                    </div>
+                  </div>
+                  <div className="pt-2">
+                    <Badge variant="outline" className="gap-1">
+                      <Clock size={14} weight="duotone" />
+                      Active from {darkModeSettings.scheduledStart || '20:00'} to {darkModeSettings.scheduledEnd || '07:00'}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant={userProfile?.preferences.nightMode ? 'default' : 'secondary'}>
+                    {userProfile?.preferences.nightMode ? 'Dark mode active' : 'Light mode active'}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  Current theme status • Changes apply immediately across the entire app
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

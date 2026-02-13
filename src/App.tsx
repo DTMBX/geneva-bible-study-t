@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
 import { useDarkMode } from '@/hooks/use-dark-mode'
+import { useAutoDarkMode } from '@/hooks/use-auto-dark-mode'
 import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog'
 import HomeView from '@/components/views/HomeView'
 import LibraryView from '@/components/views/LibraryView'
@@ -25,6 +26,7 @@ import type { UserProfile, FriendRequest, Conversation, GroupDiscussion } from '
 function App() {
   const isMobile = useIsMobile()
   const isDarkMode = useDarkMode()
+  useAutoDarkMode()
   const [activeTab, setActiveTab] = useState('home')
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   
@@ -98,7 +100,7 @@ function App() {
     {
       key: 'd',
       ctrl: true,
-      description: 'Toggle dark mode',
+      description: 'Toggle dark mode (manual override)',
       action: () => {
         setUserProfile(current => ({
           ...current!,
