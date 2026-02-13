@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { X, Translate, Copy, Check, Plus, Minus } from '@phosphor-icons/react'
+import { useKV } from '@github/spark/hooks'
+import { X, Translate, Copy, Check, Plus, Minus, BookmarkSimple } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -10,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { toast } from 'sonner'
 import { fetchVerse } from '@/lib/bibleApi'
 import { bibleBooks } from '@/lib/data'
+import type { TranslationPreset } from '@/lib/types'
 
 interface VerseComparisonDialogProps {
   open: boolean
@@ -48,6 +50,7 @@ export default function VerseComparisonDialog({ open, onOpenChange, verseData }:
   const [translationVerses, setTranslationVerses] = useState<TranslationVerse[]>([])
   const [copied, setCopied] = useState(false)
   const [showTranslationPicker, setShowTranslationPicker] = useState(false)
+  const [presets] = useKV<TranslationPreset[]>('translation-presets', [])
 
   useEffect(() => {
     if (open) {
@@ -136,6 +139,11 @@ export default function VerseComparisonDialog({ open, onOpenChange, verseData }:
     })
   }
 
+  const handleLoadPreset = (preset: TranslationPreset) => {
+    setSelectedTranslations(preset.translationIds)
+    toast.success(`Loaded "${preset.name}"`)
+  }
+
   const handleCopyAll = () => {
     const book = bibleBooks.find(b => b.id === verseData.bookId)
     const reference = `${book?.title} ${verseData.chapter}:${verseData.verse}`
@@ -204,6 +212,30 @@ export default function VerseComparisonDialog({ open, onOpenChange, verseData }:
                 <Translate size={18} weight="duotone" className="text-primary" />
                 Select up to 6 translations to compare side-by-side
               </Label>
+              
+              {presets && presets.length > 0 && (
+                <div className="mb-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <BookmarkSimple size={16} weight="duotone" className="text-primary" />
+                    <span className="text-xs font-medium">Quick load preset:</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {presets.map(preset => (
+                      <Button
+                        key={preset.id}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleLoadPreset(preset)}
+                        className="text-xs h-7"
+                      >
+                        {preset.name} ({preset.translationIds.length})
+                      </Button>
+                    ))}
+                  </div>
+                  <Separator className="my-3" />
+                </div>
+              )}
+              
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {AVAILABLE_TRANSLATIONS.map(translation => {
                   const isSelected = selectedTranslations.includes(translation.id)

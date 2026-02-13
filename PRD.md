@@ -58,11 +58,11 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Success criteria**: Geneva Bible loads in <2s on mid-tier devices; user can navigate to any passage in <3 taps; reading position persists across sessions; typography settings apply immediately
 
 ### 2. Side-by-Side Translation Comparison
-- **Functionality**: Compare Geneva against ESV, NIV, and KJV variants with synchronized scrolling, verse alignment, and highlighted differences with plain-language explanations
-- **Purpose**: Enable students and teachers to quickly understand translation choices, manuscript differences, and theological implications of word selection across major English traditions
+- **Functionality**: Compare Geneva against ESV, NIV, and KJV variants with synchronized scrolling, verse alignment, and highlighted differences with plain-language explanations. Users can save favorite translation combinations as presets for quick access, with the ability to set a default preset that loads automatically.
+- **Purpose**: Enable students and teachers to quickly understand translation choices, manuscript differences, and theological implications of word selection across major English traditions. Presets streamline repeated comparison workflows.
 - **Trigger**: From any verse in Reader, tap Compare icon; or launch directly from Compare tab with passage selector
-- **Progression**: Reader view on verse → Tap Compare → Comparison view opens with Geneva + selected translations (ESV/NIV/KJV) → Synchronized scroll → Tap highlighted differences → Explanation panel shows manuscript basis and translation philosophy → Toggle translations on/off → Share or save comparison set
-- **Success criteria**: Comparison view loads aligned verses in <1s; differences are visually clear; explanations cite sources; at least 3 translations can be compared simultaneously
+- **Progression**: Reader view on verse → Tap Compare → Comparison view opens with Geneva + selected translations (ESV/NIV/KJV) → Synchronized scroll → Tap highlighted differences → Explanation panel shows manuscript basis and translation philosophy → Toggle translations on/off → Save current selection as preset with name and description → Load saved presets with one click → Set default preset for automatic loading → Delete or manage presets as needed
+- **Success criteria**: Comparison view loads aligned verses in <1s; differences are visually clear; explanations cite sources; at least 3 translations can be compared simultaneously; presets save/load instantly; default preset loads on tab open
 
 ### 3. Bible as Library Navigator
 - **Functionality**: Visual bookshelf organization showing Bible as compiled collection with categories (Law, History, Wisdom, Prophets, Gospels, Epistles, Apocalypse, Deuterocanon, Other Works), book introductions, and cross-tradition canon differences

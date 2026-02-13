@@ -522,3 +522,12 @@ export interface AudioPlaylist {
   updatedAt: number
   isDefault?: boolean
 }
+
+export interface TranslationPreset {
+  id: string
+  name: string
+  description?: string
+  translationIds: string[]
+  createdAt: number
+  isDefault?: boolean
+}
