@@ -1,5 +1,173 @@
+import { useState } from 'react'
+import { useKV } from '@github/spark/hooks'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { useIsMobile } from '@/hooks/use-mobile'
+import HomeView from '@/components/views/HomeView'
+import LibraryView from '@/components/views/LibraryView'
+import CompareView from '@/components/views/CompareView'
+import SearchView from '@/components/views/SearchView'
+import TimelineView from '@/components/views/TimelineView'
+import SettingsView from '@/components/views/SettingsView'
+import type { UserProfile } from '@/lib/types'
+
 function App() {
-    return <div></div>
+  const isMobile = useIsMobile()
+  const [activeTab, setActiveTab] = useState('home')
+  
+  const [userProfile = {
+    id: 'default-user',
+    displayName: 'Reader',
+    role: 'reader' as const,
+    preferences: {
+      defaultTranslation: 'geneva',
+      comparisonSet: ['geneva', 'kjv', 'esv', 'niv'],
+      fontSize: 18,
+      lineSpacing: 1.75,
+      fontFamily: 'Literata',
+      nightMode: false,
+      redLetterText: false,
+      verseNumbersVisible: true
+    }
+  }] = useKV<UserProfile>('user-profile', {
+    id: 'default-user',
+    displayName: 'Reader',
+    role: 'reader',
+    preferences: {
+      defaultTranslation: 'geneva',
+      comparisonSet: ['geneva', 'kjv', 'esv', 'niv'],
+      fontSize: 18,
+      lineSpacing: 1.75,
+      fontFamily: 'Literata',
+      nightMode: false,
+      redLetterText: false,
+      verseNumbersVisible: true
+    }
+  })
+
+  return (
+    <div className="h-screen flex flex-col bg-background">
+      <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Books size={28} weight="duotone" className="text-primary" />
+          <h1 className="text-2xl font-bold text-primary tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+            Geneva Bible Study
+          </h1>
+        </div>
+        {!isMobile && (
+          <button
+            onClick={() => setActiveTab('settings')}
+            className="p-2 hover:bg-muted rounded-md transition-colors"
+          >
+            <Gear size={24} weight="duotone" className="text-muted-foreground" />
+          </button>
+        )}
+      </header>
+
+      <div className="flex-1 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          {isMobile ? (
+            <>
+              <div className="flex-1 overflow-auto">
+                <TabsContent value="home" className="mt-0 h-full">
+                  <HomeView userProfile={userProfile} />
+                </TabsContent>
+                <TabsContent value="library" className="mt-0 h-full">
+                  <LibraryView />
+                </TabsContent>
+                <TabsContent value="compare" className="mt-0 h-full">
+                  <CompareView userProfile={userProfile} />
+                </TabsContent>
+                <TabsContent value="search" className="mt-0 h-full">
+                  <SearchView />
+                </TabsContent>
+                <TabsContent value="timeline" className="mt-0 h-full">
+                  <TimelineView />
+                </TabsContent>
+                <TabsContent value="settings" className="mt-0 h-full">
+                  <SettingsView userProfile={userProfile} />
+                </TabsContent>
+              </div>
+
+              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-5 bg-card">
+                <TabsTrigger value="home" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <BookOpen size={24} weight="duotone" />
+                  <span className="text-xs">Home</span>
+                </TabsTrigger>
+                <TabsTrigger value="library" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <Books size={24} weight="duotone" />
+                  <span className="text-xs">Library</span>
+                </TabsTrigger>
+                <TabsTrigger value="compare" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <Columns size={24} weight="duotone" />
+                  <span className="text-xs">Compare</span>
+                </TabsTrigger>
+                <TabsTrigger value="search" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <MagnifyingGlass size={24} weight="duotone" />
+                  <span className="text-xs">Search</span>
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <Clock size={24} weight="duotone" />
+                  <span className="text-xs">Timeline</span>
+                </TabsTrigger>
+              </TabsList>
+            </>
+          ) : (
+            <div className="flex h-full">
+              <TabsList className="w-60 flex-col gap-2 p-4 rounded-none border-r bg-card items-stretch justify-start h-full">
+                <TabsTrigger value="home" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <BookOpen size={24} weight="duotone" />
+                  <span>Home</span>
+                </TabsTrigger>
+                <TabsTrigger value="library" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Books size={24} weight="duotone" />
+                  <span>Library</span>
+                </TabsTrigger>
+                <TabsTrigger value="compare" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Columns size={24} weight="duotone" />
+                  <span>Compare</span>
+                </TabsTrigger>
+                <TabsTrigger value="search" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <MagnifyingGlass size={24} weight="duotone" />
+                  <span>Search</span>
+                </TabsTrigger>
+                <TabsTrigger value="timeline" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Clock size={24} weight="duotone" />
+                  <span>Timeline</span>
+                </TabsTrigger>
+                <div className="flex-1" />
+                <TabsTrigger value="settings" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Gear size={24} weight="duotone" />
+                  <span>Settings</span>
+                </TabsTrigger>
+              </TabsList>
+
+              <div className="flex-1 overflow-auto">
+                <TabsContent value="home" className="mt-0 h-full">
+                  <HomeView userProfile={userProfile} />
+                </TabsContent>
+                <TabsContent value="library" className="mt-0 h-full">
+                  <LibraryView />
+                </TabsContent>
+                <TabsContent value="compare" className="mt-0 h-full">
+                  <CompareView userProfile={userProfile} />
+                </TabsContent>
+                <TabsContent value="search" className="mt-0 h-full">
+                  <SearchView />
+                </TabsContent>
+                <TabsContent value="timeline" className="mt-0 h-full">
+                  <TimelineView />
+                </TabsContent>
+                <TabsContent value="settings" className="mt-0 h-full">
+                  <SettingsView userProfile={userProfile} />
+                </TabsContent>
+              </div>
+            </div>
+          )}
+        </Tabs>
+      </div>
+    </div>
+  )
 }
 
 export default App
