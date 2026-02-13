@@ -9,27 +9,14 @@ import CompareView from '@/components/views/CompareView'
 import SearchView from '@/components/views/SearchView'
 import TimelineView from '@/components/views/TimelineView'
 import SettingsView from '@/components/views/SettingsView'
+import ReaderView from '@/components/reader/ReaderView'
 import type { UserProfile } from '@/lib/types'
 
 function App() {
   const isMobile = useIsMobile()
   const [activeTab, setActiveTab] = useState('home')
   
-  const [userProfile = {
-    id: 'default-user',
-    displayName: 'Reader',
-    role: 'reader' as const,
-    preferences: {
-      defaultTranslation: 'geneva',
-      comparisonSet: ['geneva', 'kjv', 'esv', 'niv'],
-      fontSize: 18,
-      lineSpacing: 1.75,
-      fontFamily: 'Literata',
-      nightMode: false,
-      redLetterText: false,
-      verseNumbersVisible: true
-    }
-  }] = useKV<UserProfile>('user-profile', {
+  const [userProfile] = useKV<UserProfile>('user-profile', {
     id: 'default-user',
     displayName: 'Reader',
     role: 'reader',
@@ -70,7 +57,10 @@ function App() {
             <>
               <div className="flex-1 overflow-auto">
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile} />
+                  <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
+                </TabsContent>
+                <TabsContent value="reader" className="mt-0 h-full">
+                  <ReaderView userProfile={userProfile} />
                 </TabsContent>
                 <TabsContent value="library" className="mt-0 h-full">
                   <LibraryView />
@@ -119,6 +109,10 @@ function App() {
                   <BookOpen size={24} weight="duotone" />
                   <span>Home</span>
                 </TabsTrigger>
+                <TabsTrigger value="reader" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <BookOpen size={24} weight="duotone" />
+                  <span>Reader</span>
+                </TabsTrigger>
                 <TabsTrigger value="library" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Books size={24} weight="duotone" />
                   <span>Library</span>
@@ -144,7 +138,10 @@ function App() {
 
               <div className="flex-1 overflow-auto">
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile} />
+                  <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
+                </TabsContent>
+                <TabsContent value="reader" className="mt-0 h-full">
+                  <ReaderView userProfile={userProfile} />
                 </TabsContent>
                 <TabsContent value="library" className="mt-0 h-full">
                   <LibraryView />

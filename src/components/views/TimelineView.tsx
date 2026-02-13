@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Clock, Warning, BookOpen } from '@phosphor-icons/react'
 import { timelineEvents } from '@/lib/data'
+import InteractiveTimeline from '@/components/timeline/InteractiveTimeline'
 import type { HistoricalEvent } from '@/lib/types'
 
 const confidenceColors = {
@@ -41,69 +42,8 @@ export default function TimelineView() {
     ? timelineEvents
     : timelineEvents.filter(event => event.category === selectedCategory)
 
-  const renderEvent = (event: HistoricalEvent) => (
-    <Card
-      key={event.id}
-      className={`hover:shadow-lg transition-shadow border-l-4 ${categoryColors[event.category]}`}
-    >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <CardTitle className="text-lg mb-2">{event.title}</CardTitle>
-            <CardDescription className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="text-xs">
-                {event.date}
-              </Badge>
-              <Badge variant="secondary" className="text-xs">
-                {categoryLabels[event.category]}
-              </Badge>
-              {event.tradition && (
-                <Badge className="text-xs capitalize">
-                  {event.tradition}
-                </Badge>
-              )}
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className={`w-2 h-2 rounded-full ${confidenceColors[event.dateConfidence]}`} />
-            <span className="text-xs text-muted-foreground">
-              {confidenceLabels[event.dateConfidence]}
-            </span>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-foreground mb-3 leading-relaxed">
-          {event.description}
-        </p>
-        {event.sources.length > 0 && (
-          <div className="mt-3 pt-3 border-t">
-            <p className="text-xs font-semibold mb-1 text-muted-foreground">Sources:</p>
-            <div className="space-y-1">
-              {event.sources.map(source => (
-                <p key={source.id} className="text-xs text-muted-foreground">
-                  • {source.title}
-                  {source.author && ` by ${source.author}`}
-                  {source.year && ` (${source.year})`}
-                </p>
-              ))}
-            </div>
-          </div>
-        )}
-        {event.relatedWorks.length > 0 && (
-          <div className="mt-3 flex items-center gap-2">
-            <BookOpen size={14} weight="duotone" className="text-muted-foreground" />
-            <span className="text-xs text-muted-foreground">
-              Related: {event.relatedWorks.join(', ')}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  )
-
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
         <h2 className="text-3xl font-bold mb-2 text-foreground flex items-center gap-3" style={{ fontFamily: 'var(--font-heading)' }}>
           <Clock size={32} weight="duotone" className="text-primary" />
@@ -157,17 +97,7 @@ export default function TimelineView() {
         </TabsList>
       </Tabs>
 
-      <div className="space-y-6">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map(renderEvent)
-        ) : (
-          <Card>
-            <CardContent className="pt-6 text-center text-muted-foreground">
-              <p>No events found for this category</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <InteractiveTimeline events={filteredEvents} selectedCategory={selectedCategory} />
 
       <Card className="mt-8 bg-muted/30">
         <CardHeader>

@@ -94,7 +94,7 @@ export const bibleBooks: TextWork[] = [
     compositionDate: '~1400-500 BCE',
     compositionConfidence: 'debated',
     traditionalAuthor: 'Moses',
-    introduction: 'Genesis opens the biblical library with primordial narratives of creation, early humanity, and the patriarchs Abraham, Isaac, Jacob, and Joseph. The book establishes foundational themes: God as creator, human rebellion, covenant promises, and divine redemption through a chosen people. Scholars debate its composition, with traditional Jewish and Christian views attributing it to Moses, while critical scholarship sees it as woven from multiple ancient sources edited during Israel\'s monarchy and exile.',
+    introduction: 'Genesis opens the biblical library with primordial narratives of creation, early humanity, and the patriarchs Abraham, Isaac, Jacob, and Joseph. The book establishes foundational themes: God as creator, human rebellion, covenant promises, and divine redemption through a chosen people.',
     metadata: {
       testament: 'old',
       order: 1
@@ -116,10 +116,296 @@ export const bibleBooks: TextWork[] = [
     compositionDate: '~1400-500 BCE',
     compositionConfidence: 'debated',
     traditionalAuthor: 'Moses',
-    introduction: 'Exodus narrates Israel\'s liberation from Egyptian slavery, the giving of the Law at Mount Sinai, and instructions for worship. Central to Jewish identity and Christian theology, it presents God as redeemer and lawgiver. The book includes the Ten Commandments and detailed instructions for the tabernacle. Historical dating of the Exodus event remains debated among scholars.',
+    introduction: 'Exodus narrates Israel\'s liberation from Egyptian slavery, the giving of the Law at Mount Sinai, and instructions for worship. Central to Jewish identity and Christian theology, it presents God as redeemer and lawgiver.',
     metadata: {
       testament: 'old',
       order: 2
+    }
+  },
+  {
+    id: 'lev',
+    title: 'Leviticus',
+    shortName: 'Lev',
+    category: 'law',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 27,
+    compositionDate: '~1400-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Moses',
+    introduction: 'Leviticus contains laws for worship, sacrifice, purity, and holiness. It establishes the priestly system and moral code for Israel.',
+    metadata: {
+      testament: 'old',
+      order: 3
+    }
+  },
+  {
+    id: 'num',
+    title: 'Numbers',
+    shortName: 'Num',
+    category: 'law',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 36,
+    compositionDate: '~1400-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Moses',
+    introduction: 'Numbers chronicles Israel\'s wilderness wanderings, including census records, tribal organization, and rebellions against Moses and God.',
+    metadata: {
+      testament: 'old',
+      order: 4
+    }
+  },
+  {
+    id: 'deu',
+    title: 'Deuteronomy',
+    shortName: 'Deut',
+    category: 'law',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 34,
+    compositionDate: '~1400-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Moses',
+    introduction: 'Deuteronomy presents Moses\' final speeches to Israel before entering the Promised Land, restating the Law and calling for covenant faithfulness.',
+    metadata: {
+      testament: 'old',
+      order: 5
+    }
+  },
+  {
+    id: 'jos',
+    title: 'Joshua',
+    shortName: 'Josh',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 24,
+    compositionDate: '~600-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Joshua',
+    introduction: 'Joshua narrates Israel\'s conquest and settlement of Canaan under Joshua\'s leadership after Moses\' death.',
+    metadata: {
+      testament: 'old',
+      order: 6
+    }
+  },
+  {
+    id: 'jdg',
+    title: 'Judges',
+    shortName: 'Judg',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 21,
+    compositionDate: '~600-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Samuel',
+    introduction: 'Judges describes Israel\'s cycles of apostasy, oppression, and deliverance through military leaders called judges.',
+    metadata: {
+      testament: 'old',
+      order: 7
+    }
+  },
+  {
+    id: 'rut',
+    title: 'Ruth',
+    shortName: 'Ruth',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 4,
+    compositionDate: '~600-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Samuel',
+    introduction: 'Ruth tells the story of a Moabite widow\'s loyalty to her Israelite mother-in-law and her inclusion in David\'s lineage.',
+    metadata: {
+      testament: 'old',
+      order: 8
+    }
+  },
+  {
+    id: '1sa',
+    title: '1 Samuel',
+    shortName: '1 Sam',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 31,
+    compositionDate: '~630-540 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Samuel',
+    introduction: '1 Samuel narrates the transition from judges to monarchy, featuring Samuel, Saul, and the rise of David.',
+    metadata: {
+      testament: 'old',
+      order: 9
+    }
+  },
+  {
+    id: '2sa',
+    title: '2 Samuel',
+    shortName: '2 Sam',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 24,
+    compositionDate: '~630-540 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Samuel',
+    introduction: '2 Samuel chronicles David\'s reign as king, including his successes, sins, and the succession crisis.',
+    metadata: {
+      testament: 'old',
+      order: 10
+    }
+  },
+  {
+    id: 'psa',
+    title: 'Psalms',
+    shortName: 'Ps',
+    category: 'wisdom',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 150,
+    compositionDate: '~1000-300 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'David and others',
+    introduction: 'Psalms is Israel\'s hymnal and prayer book, containing 150 poems expressing praise, lament, thanksgiving, and wisdom.',
+    metadata: {
+      testament: 'old',
+      order: 19
+    }
+  },
+  {
+    id: 'pro',
+    title: 'Proverbs',
+    shortName: 'Prov',
+    category: 'wisdom',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 31,
+    compositionDate: '~950-700 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Solomon',
+    introduction: 'Proverbs offers practical wisdom for daily living, emphasizing the fear of the Lord as the beginning of wisdom.',
+    metadata: {
+      testament: 'old',
+      order: 20
+    }
+  },
+  {
+    id: 'isa',
+    title: 'Isaiah',
+    shortName: 'Isa',
+    category: 'prophets',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 66,
+    compositionDate: '~740-500 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Isaiah',
+    introduction: 'Isaiah contains prophetic messages of judgment and hope, including messianic prophecies central to Christian theology.',
+    metadata: {
+      testament: 'old',
+      order: 23
+    }
+  },
+  {
+    id: 'jer',
+    title: 'Jeremiah',
+    shortName: 'Jer',
+    category: 'prophets',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 52,
+    compositionDate: '~627-580 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Jeremiah',
+    introduction: 'Jeremiah prophesied Judah\'s exile, calling for repentance while promising future restoration and a new covenant.',
+    metadata: {
+      testament: 'old',
+      order: 24
+    }
+  },
+  {
+    id: 'dan',
+    title: 'Daniel',
+    shortName: 'Dan',
+    category: 'prophets',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 12,
+    compositionDate: '~165 BCE or ~530 BCE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Daniel',
+    introduction: 'Daniel combines narratives of Jewish faithfulness in Babylonian exile with apocalyptic visions of future kingdoms.',
+    metadata: {
+      testament: 'old',
+      order: 27
     }
   },
   {
@@ -138,10 +424,186 @@ export const bibleBooks: TextWork[] = [
     compositionDate: '~70-90 CE',
     compositionConfidence: 'scholarly-consensus',
     traditionalAuthor: 'Matthew the Apostle',
-    introduction: 'The Gospel of Matthew presents Jesus as the Jewish Messiah fulfilling Old Testament prophecy. Written for a Jewish-Christian audience, it emphasizes Jesus\' teaching authority through five major discourses, including the Sermon on the Mount. Matthew traces Jesus\' genealogy to Abraham and David, demonstrating his royal and covenantal credentials. The gospel culminates in the Great Commission, sending disciples to all nations.',
+    introduction: 'Matthew presents Jesus as the Jewish Messiah fulfilling Old Testament prophecy, emphasizing His teaching authority through five major discourses.',
     metadata: {
       testament: 'new',
       order: 40
+    }
+  },
+  {
+    id: 'mar',
+    title: 'Mark',
+    shortName: 'Mark',
+    category: 'gospels',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 16,
+    compositionDate: '~65-70 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'John Mark',
+    introduction: 'Mark is the earliest gospel, presenting Jesus as the suffering servant who comes to serve and give His life as a ransom.',
+    metadata: {
+      testament: 'new',
+      order: 41
+    }
+  },
+  {
+    id: 'luk',
+    title: 'Luke',
+    shortName: 'Luke',
+    category: 'gospels',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 24,
+    compositionDate: '~80-90 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Luke',
+    introduction: 'Luke emphasizes Jesus\' compassion for the marginalized and traces His ministry from birth through resurrection and ascension.',
+    metadata: {
+      testament: 'new',
+      order: 42
+    }
+  },
+  {
+    id: 'joh',
+    title: 'John',
+    shortName: 'John',
+    category: 'gospels',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 21,
+    compositionDate: '~90-100 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'John the Apostle',
+    introduction: 'John presents Jesus as the divine Word made flesh, emphasizing His identity as the Son of God through selected signs and discourses.',
+    metadata: {
+      testament: 'new',
+      order: 43
+    }
+  },
+  {
+    id: 'act',
+    title: 'Acts',
+    shortName: 'Acts',
+    category: 'history',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 28,
+    compositionDate: '~80-90 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Luke',
+    introduction: 'Acts chronicles the early church\'s growth from Jerusalem to Rome, featuring Peter, Paul, and the spread of the gospel.',
+    metadata: {
+      testament: 'new',
+      order: 44
+    }
+  },
+  {
+    id: 'rom',
+    title: 'Romans',
+    shortName: 'Rom',
+    category: 'epistles',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 16,
+    compositionDate: '~57 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Paul',
+    introduction: 'Romans is Paul\'s systematic presentation of the gospel, explaining justification by faith and God\'s plan for Jew and Gentile.',
+    metadata: {
+      testament: 'new',
+      order: 45
+    }
+  },
+  {
+    id: '1co',
+    title: '1 Corinthians',
+    shortName: '1 Cor',
+    category: 'epistles',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 16,
+    compositionDate: '~54-55 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Paul',
+    introduction: '1 Corinthians addresses divisions, immorality, and misuse of spiritual gifts in the Corinthian church.',
+    metadata: {
+      testament: 'new',
+      order: 46
+    }
+  },
+  {
+    id: 'gal',
+    title: 'Galatians',
+    shortName: 'Gal',
+    category: 'epistles',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 6,
+    compositionDate: '~48-55 CE',
+    compositionConfidence: 'scholarly-consensus',
+    traditionalAuthor: 'Paul',
+    introduction: 'Galatians defends justification by faith alone against those requiring Gentile converts to follow Jewish law.',
+    metadata: {
+      testament: 'new',
+      order: 48
+    }
+  },
+  {
+    id: 'eph',
+    title: 'Ephesians',
+    shortName: 'Eph',
+    category: 'epistles',
+    canonStatus: {
+      protestant: 'canonical',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 6,
+    compositionDate: '~60-62 CE',
+    compositionConfidence: 'debated',
+    traditionalAuthor: 'Paul',
+    introduction: 'Ephesians explores the church as Christ\'s body, emphasizing unity, spiritual blessings, and practical Christian living.',
+    metadata: {
+      testament: 'new',
+      order: 49
     }
   },
   {
@@ -160,10 +622,136 @@ export const bibleBooks: TextWork[] = [
     compositionDate: '~90-96 CE',
     compositionConfidence: 'scholarly-consensus',
     traditionalAuthor: 'John the Apostle',
-    introduction: 'Revelation, the final book of the New Testament, presents apocalyptic visions of cosmic conflict, divine judgment, and ultimate restoration. Written to seven churches in Asia Minor during Roman persecution, it uses rich symbolic imagery drawn from Old Testament prophets. The book\'s interpretation has been debated throughout church history, with readers seeing it as past events, ongoing spiritual realities, future prophecy, or combinations thereof.',
+    introduction: 'Revelation presents apocalyptic visions of cosmic conflict, divine judgment, and ultimate restoration through rich symbolic imagery.',
     metadata: {
       testament: 'new',
       order: 66
+    }
+  },
+  {
+    id: 'tob',
+    title: 'Tobit',
+    shortName: 'Tob',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 14,
+    compositionDate: '~225-175 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: 'Tobit narrates the story of a righteous Israelite and his son Tobias, emphasizing faithfulness, prayer, and divine providence.',
+    metadata: {
+      testament: 'other',
+      order: 67
+    }
+  },
+  {
+    id: 'jdt',
+    title: 'Judith',
+    shortName: 'Jdt',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 16,
+    compositionDate: '~150 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: 'Judith tells of a brave Jewish widow who saves her people from an Assyrian general through courage and cunning.',
+    metadata: {
+      testament: 'other',
+      order: 68
+    }
+  },
+  {
+    id: 'wis',
+    title: 'Wisdom of Solomon',
+    shortName: 'Wis',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 19,
+    compositionDate: '~100-50 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: 'Wisdom reflects on righteousness, immortality, and God\'s providence, blending Jewish theology with Greek philosophical concepts.',
+    metadata: {
+      testament: 'other',
+      order: 69
+    }
+  },
+  {
+    id: 'sir',
+    title: 'Sirach (Ecclesiasticus)',
+    shortName: 'Sir',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 51,
+    compositionDate: '~180 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: 'Sirach offers practical wisdom for daily living, combining traditional Jewish teachings with ethical instructions.',
+    metadata: {
+      testament: 'other',
+      order: 70
+    }
+  },
+  {
+    id: '1ma',
+    title: '1 Maccabees',
+    shortName: '1 Macc',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 16,
+    compositionDate: '~100 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: '1 Maccabees chronicles the Jewish revolt against Seleucid oppression and the rededication of the Temple.',
+    metadata: {
+      testament: 'other',
+      order: 71
+    }
+  },
+  {
+    id: '2ma',
+    title: '2 Maccabees',
+    shortName: '2 Macc',
+    category: 'deuterocanon',
+    canonStatus: {
+      protestant: 'apocryphal',
+      catholic: 'canonical',
+      orthodox: 'canonical',
+      jewish: 'non-canonical',
+      ethiopian: 'canonical'
+    },
+    chaptersCount: 15,
+    compositionDate: '~124 BCE',
+    compositionConfidence: 'scholarly-consensus',
+    introduction: '2 Maccabees provides a theological interpretation of the Maccabean revolt, emphasizing divine intervention and martyrdom.',
+    metadata: {
+      testament: 'other',
+      order: 72
     }
   }
 ]
