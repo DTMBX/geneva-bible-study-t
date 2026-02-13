@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users, ChatCircle } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { useIsMobile } from '@/hooks/use-mobile'
@@ -12,9 +12,10 @@ import TimelineView from '@/components/views/TimelineView'
 import SettingsView from '@/components/views/SettingsView'
 import ReadingPlanView from '@/components/views/ReadingPlanView'
 import SocialView from '@/components/views/SocialView'
+import MessagesView from '@/components/views/MessagesView'
 import ReaderView from '@/components/reader/ReaderView'
 import BibleApiDemo from '@/components/BibleApiDemo'
-import type { UserProfile, FriendRequest } from '@/lib/types'
+import type { UserProfile, FriendRequest, Conversation } from '@/lib/types'
 
 function App() {
   const isMobile = useIsMobile()
@@ -37,7 +38,22 @@ function App() {
   })
 
   const [friendRequests = []] = useKV<FriendRequest[]>('friend-requests', [])
+  const [conversations = []] = useKV<Conversation[]>('conversations', [])
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [messageNavigation, setMessageNavigation] = useState<{ friendId: string; verseRef?: any } | null>(null)
+
+  useState(() => {
+    const fetchUser = async () => {
+      const user = await window.spark.user()
+      setCurrentUserId(user?.id?.toString() || 'anonymous')
+    }
+    fetchUser()
+  })
+
   const pendingRequestCount = friendRequests.filter(req => req.status === 'pending').length
+  const unreadMessagesCount = conversations.reduce((total, conv) => {
+    return total + (conv.unreadCount[currentUserId] || 0)
+  }, 0)
 
   const handleNavigateToReader = (bookId: string, chapter: number) => {
     setActiveTab('reader')
@@ -47,6 +63,11 @@ function App() {
       })
       window.dispatchEvent(event)
     }, 100)
+  }
+
+  const handleNavigateToMessages = (friendId: string, verseRef?: any) => {
+    setMessageNavigation({ friendId, verseRef })
+    setActiveTab('messages')
   }
 
   return (
@@ -98,14 +119,17 @@ function App() {
                   <ReadingPlanView onNavigateToReader={handleNavigateToReader} />
                 </TabsContent>
                 <TabsContent value="social" className="mt-0 h-full">
-                  <SocialView />
+                  <SocialView onNavigateToMessages={handleNavigateToMessages} />
+                </TabsContent>
+                <TabsContent value="messages" className="mt-0 h-full">
+                  <MessagesView initialNavigation={messageNavigation} onClearNavigation={() => setMessageNavigation(null)} />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
                   <SettingsView userProfile={userProfile!} />
                 </TabsContent>
               </div>
 
-              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-8 bg-card">.
+              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-9 bg-card">
                 <TabsTrigger value="api-demo" className="flex-col gap-1 data-[state=active]:text-primary">
                   <Code size={24} weight="duotone" />
                   <span className="text-xs">API</span>
@@ -140,6 +164,15 @@ function App() {
                   {pendingRequestCount > 0 && (
                     <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive">
                       {pendingRequestCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
+                <TabsTrigger value="messages" className="flex-col gap-1 data-[state=active]:text-primary relative">
+                  <ChatCircle size={24} weight="duotone" />
+                  <span className="text-xs">Messages</span>
+                  {unreadMessagesCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-primary">
+                      {unreadMessagesCount}
                     </Badge>
                   )}
                 </TabsTrigger>
@@ -189,6 +222,15 @@ function App() {
                     </Badge>
                   )}
                 </TabsTrigger>
+                <TabsTrigger value="messages" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
+                  <ChatCircle size={24} weight="duotone" />
+                  <span>Messages</span>
+                  {unreadMessagesCount > 0 && (
+                    <Badge className="ml-auto h-6 w-6 flex items-center justify-center p-0 text-xs bg-primary">
+                      {unreadMessagesCount}
+                    </Badge>
+                  )}
+                </TabsTrigger>
                 <div className="flex-1" />
                 <TabsTrigger value="settings" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Gear size={24} weight="duotone" />
@@ -222,7 +264,10 @@ function App() {
                   <ReadingPlanView onNavigateToReader={handleNavigateToReader} />
                 </TabsContent>
                 <TabsContent value="social" className="mt-0 h-full">
-                  <SocialView />
+                  <SocialView onNavigateToMessages={handleNavigateToMessages} />
+                </TabsContent>
+                <TabsContent value="messages" className="mt-0 h-full">
+                  <MessagesView initialNavigation={messageNavigation} onClearNavigation={() => setMessageNavigation(null)} />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
                   <SettingsView userProfile={userProfile!} />

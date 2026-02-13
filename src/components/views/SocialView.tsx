@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Users, Heart, ChatCircle, ShareNetwork, Trophy, BookOpen, CalendarCheck, UserPlus, MagnifyingGlass, Path } from '@phosphor-icons/react'
+import { Users, Heart, ChatCircle, ShareNetwork, Trophy, BookOpen, CalendarCheck, UserPlus, MagnifyingGlass, Path, PaperPlaneTilt } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -9,7 +9,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
-import type { SharedVerse, SharedProgress } from '@/lib/types'
+import type { SharedVerse, SharedProgress, UserConnection } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
 import FriendsList from '@/components/social/FriendsList'
 import FindFriends from '@/components/social/FindFriends'
@@ -17,10 +17,15 @@ import ReadingJourneyView from '@/components/social/ReadingJourneyView'
 import FriendsLeaderboard from '@/components/social/FriendsLeaderboard'
 import { seedDemoFriendRequests, seedDemoFriends } from '@/lib/friend-seeding'
 
-export default function SocialView() {
+interface SocialViewProps {
+  onNavigateToMessages?: (friendId: string, verseRef?: any) => void
+}
+
+export default function SocialView({ onNavigateToMessages }: SocialViewProps) {
   const [sharedVerses = []] = useKV<SharedVerse[]>('shared-verses', [])
   const [sharedProgress = []] = useKV<SharedProgress[]>('shared-progress', [])
   const [likedItems, setLikedItems] = useKV<string[]>('liked-items', [])
+  const [friends = []] = useKV<UserConnection[]>('user-friends', [])
   const [commentText, setCommentText] = useState<Record<string, string>>({})
   const [activeView, setActiveView] = useState<'feed' | 'friends' | 'find' | 'journey'>('feed')
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
@@ -59,6 +64,10 @@ export default function SocialView() {
 
   const isVerse = (item: SharedVerse | SharedProgress): item is SharedVerse => {
     return 'verseText' in item
+  }
+
+  const isFriend = (userId: string): boolean => {
+    return friends.some(friend => friend.userId === userId)
   }
 
   if (activeView === 'journey' && selectedUserId) {
@@ -132,6 +141,18 @@ export default function SocialView() {
                             commentText={commentText[item.id] || ''}
                             onCommentChange={(text) => setCommentText({ ...commentText, [item.id]: text })}
                             onViewJourney={() => handleViewJourney(item.userId)}
+                            onMessage={onNavigateToMessages ? () => {
+                              const verseRef = isVerse(item) ? {
+                                bookName: item.bookName,
+                                chapterNumber: item.chapterNumber,
+                                verseNumber: item.verseNumber,
+                                verseEndNumber: item.verseEndNumber,
+                                verseText: item.verseText,
+                                translation: item.translation
+                              } : undefined
+                              onNavigateToMessages(item.userId, verseRef)
+                            } : undefined}
+                            isFriend={isFriend(item.userId)}
                           />
                         ))
                       )}
@@ -156,6 +177,18 @@ export default function SocialView() {
                             commentText={commentText[verse.id] || ''}
                             onCommentChange={(text) => setCommentText({ ...commentText, [verse.id]: text })}
                             onViewJourney={() => handleViewJourney(verse.userId)}
+                            onMessage={onNavigateToMessages ? () => {
+                              const verseRef = {
+                                bookName: verse.bookName,
+                                chapterNumber: verse.chapterNumber,
+                                verseNumber: verse.verseNumber,
+                                verseEndNumber: verse.verseEndNumber,
+                                verseText: verse.verseText,
+                                translation: verse.translation
+                              }
+                              onNavigateToMessages(verse.userId, verseRef)
+                            } : undefined}
+                            isFriend={isFriend(verse.userId)}
                           />
                         ))
                       )}
@@ -180,6 +213,10 @@ export default function SocialView() {
                             commentText={commentText[progress.id] || ''}
                             onCommentChange={(text) => setCommentText({ ...commentText, [progress.id]: text })}
                             onViewJourney={() => handleViewJourney(progress.userId)}
+                            onMessage={onNavigateToMessages ? () => {
+                              onNavigateToMessages(progress.userId)
+                            } : undefined}
+                            isFriend={isFriend(progress.userId)}
                           />
                         ))
                       )}
@@ -213,9 +250,11 @@ interface ShareCardProps {
   commentText: string
   onCommentChange: (text: string) => void
   onViewJourney: () => void
+  onMessage?: () => void
+  isFriend?: boolean
 }
 
-function ShareCard({ item, isLiked, onLike, onViewJourney }: ShareCardProps) {
+function ShareCard({ item, isLiked, onLike, onViewJourney, onMessage, isFriend }: ShareCardProps) {
   const isVerse = 'verseText' in item
 
   return (
@@ -323,6 +362,12 @@ function ShareCard({ item, isLiked, onLike, onViewJourney }: ShareCardProps) {
               {item.comments.length > 0 && item.comments.length}
             </span>
           </Button>
+          {onMessage && isFriend && (
+            <Button variant="ghost" size="sm" className="gap-1" onClick={onMessage}>
+              <PaperPlaneTilt size={16} weight="regular" />
+              <span className="text-xs">Message</span>
+            </Button>
+          )}
           <Button variant="ghost" size="sm" className="gap-1 ml-auto">
             <ShareNetwork size={16} weight="regular" />
           </Button>

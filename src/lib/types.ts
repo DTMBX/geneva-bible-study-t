@@ -377,3 +377,36 @@ export interface ReadingJourney {
     value: number
   }[]
 }
+
+export interface Message {
+  id: string
+  conversationId: string
+  fromUserId: string
+  toUserId: string
+  content: string
+  verseReference?: {
+    bookName: string
+    chapterNumber: number
+    verseNumber: number
+    verseEndNumber?: number
+    verseText?: string
+    translation?: string
+  }
+  createdAt: number
+  readAt?: number
+  editedAt?: number
+}
+
+export interface Conversation {
+  id: string
+  participantIds: [string, string]
+  participants: {
+    userId: string
+    userName: string
+    userAvatar?: string
+  }[]
+  lastMessage?: Message
+  lastMessageAt: number
+  unreadCount: Record<string, number>
+  createdAt: number
+}

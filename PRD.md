@@ -124,7 +124,14 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Progression**: Community tab → Browse tabs (Feed, Friends, Find Friends) → Tap Find Friends → Search by name, location, or denomination → View user profiles with reading stats and bio → Send friend request → User accepts request → View friend's reading journey showing current book, active plans (with progress %), reading streak, total chapters read, recent activity timeline, and achieved milestones → Like/comment on their shares → Get inspired by their progress → Manage own community profile in Settings → Set bio, location, denomination → Configure privacy settings (profile visibility, show reading progress, show friends list, allow friend requests) → Profile appears in search results based on privacy settings
 - **Success criteria**: Friend requests send/accept instantly; search returns results in <500ms; reading journeys display complete activity history; privacy settings apply immediately; friend connections persist across sessions; mutual friends are calculated and displayed; activity feed shows real-time updates from friends; journey view loads user stats accurately; profile changes save immediately; users can be discovered based on public profile settings
 
-### 13. Curator/Admin Content Management
+### 13. Private Messaging Between Friends
+- **Functionality**: Send and receive private messages with friends to discuss verses and scripture, view conversation threads with message history grouped by date, share verse references directly in messages with formatted verse text and translation info, see unread message counts and read receipts, search conversations, and seamlessly navigate from social feed to message a friend about a shared verse
+- **Purpose**: Enable deep spiritual discussions and personal reflections between friends, facilitate meaningful conversations about specific verses and passages, create accountability partnerships through private communication, and build stronger connections within the reading community
+- **Trigger**: Messages tab; from Social feed, tap "Message" button on friend's shared verse; from friend's profile/journey, tap message icon; click unread message badge notification
+- **Progression**: Tap Messages tab → View conversation list sorted by most recent → See unread counts on conversations → Tap conversation or new friend to start thread → Conversation opens with date-grouped message history → Type message in input field → Press Enter or Send button → Message appears in thread instantly → When sharing verses, verse reference auto-formats with book, chapter, verse, text, and translation → Friend receives message, unread count increments → Friend opens conversation, messages mark as read → Both users can scroll through history → Continue discussion about verses and spiritual insights → Return to list to view other conversations
+- **Success criteria**: Messages send in <500ms; unread counts update in real-time; message history loads completely; date grouping is accurate; verse references display formatted with full context; read receipts show when friend views message; conversation list updates with latest message preview; smooth navigation from social feed to messages with friend pre-selected; mobile displays list/thread toggle; desktop shows split-pane with list and thread side-by-side; message persistence works across sessions
+
+### 14. Curator/Admin Content Management
 - **Functionality**: Role-based tools for curators to edit metadata, alignment annotations, timeline events, and book introductions with versioned audit logs and reversible changes
 - **Purpose**: Maintain content quality and accuracy through community curation while ensuring all edits are transparent and reversible
 - **Trigger**: Admin users see "Edit" buttons throughout app; or Admin → Content Management dashboard
@@ -248,6 +255,13 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - ArrowsOutSimple (Expand comparison)
   - Funnel (Search filters)
   - Tag (Note tags)
+  - Users (Community/Social features)
+  - UserPlus (Send friend request)
+  - Trophy (Milestones and achievements)
+  - Heart (Like/favorite shared content)
+  - ChatCircle (Comments on shares, Messages)
+  - PaperPlaneTilt (Send message)
+  - CalendarCheck (Reading plans)
   - CalendarCheck (Reading Plans)
   - Play/Pause (Start/pause reading plans)
   - CheckCircle/Circle (Plan day completion status)
