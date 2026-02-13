@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import type { UserProfile, Bookmark } from '@/lib/types'
 import { bibleBooks } from '@/lib/data'
+import VerseOfTheDay from '@/components/VerseOfTheDay'
 
 interface HomeViewProps {
   userProfile: UserProfile
+  onNavigateToReader?: (bookId: string, chapter: number) => void
+  onNavigateToMessages?: (friendId: string, verseRef?: any) => void
 }
 
-export default function HomeView({ userProfile }: HomeViewProps) {
+export default function HomeView({ userProfile, onNavigateToReader, onNavigateToMessages }: HomeViewProps) {
   const [bookmarks = []] = useKV<Bookmark[]>('bookmarks', [])
   const lastRead = userProfile?.lastReadPosition
 
@@ -25,6 +28,14 @@ export default function HomeView({ userProfile }: HomeViewProps) {
         <p className="text-muted-foreground text-lg">
           The Bible of the Protestant Reformation, now available for deep study and comparison
         </p>
+      </div>
+
+      <div className="mb-8">
+        <VerseOfTheDay 
+          userProfile={userProfile} 
+          onNavigateToReader={onNavigateToReader}
+          onNavigateToMessages={onNavigateToMessages}
+        />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 mb-8">

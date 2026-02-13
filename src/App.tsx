@@ -119,7 +119,11 @@ function App() {
             <>
               <div className="flex-1 overflow-auto">
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile!} />
+                  <HomeView 
+                    userProfile={userProfile!}
+                    onNavigateToReader={handleNavigateToReader}
+                    onNavigateToMessages={handleNavigateToMessages}
+                  />
                 </TabsContent>
                 <TabsContent value="reader" className="mt-0 h-full">
                   <ReaderView userProfile={userProfile!} />
@@ -280,7 +284,11 @@ function App() {
 
               <div className="flex-1 overflow-auto">
                 <TabsContent value="home" className="mt-0 h-full">
-                  <HomeView userProfile={userProfile!} />
+                  <HomeView 
+                    userProfile={userProfile!}
+                    onNavigateToReader={handleNavigateToReader}
+                    onNavigateToMessages={handleNavigateToMessages}
+                  />
                 </TabsContent>
                 <TabsContent value="reader" className="mt-0 h-full">
                   <ReaderView userProfile={userProfile!} />
