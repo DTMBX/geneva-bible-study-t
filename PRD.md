@@ -110,7 +110,14 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Progression**: Plans view opens → Browse available plans (One Year Canonical, 90 Days NT, Chronological, Gospels, Psalms & Proverbs, Pauline Epistles, Custom Plans) → Tap "Create Custom Plan" to design personalized plan with selected books and chapter distribution → Tap Start Plan → Plan dashboard shows today's reading, progress percentage, days elapsed, and streak → Tap on any chapter in today's reading to jump directly to Bible Reader → Read assigned chapters → Mark day complete → Configure daily reminders with preferred time → Track progress via list or calendar view → Pause/resume as needed → Reset if starting over → Delete custom plans when no longer needed
 - **Success criteria**: Users can start multiple plans; create unlimited custom plans with flexible chapter selections; daily readings are clearly displayed and clickable to open in Reader; progress persists across sessions; completion is tracked; calendar view shows at-a-glance progress; plans cover major reading approaches; reminders work across sessions; notifications appear at scheduled times; Reader opens directly to today's reading with one tap
 
-### 11. Curator/Admin Content Management
+### 11. Social Sharing Features
+- **Functionality**: Share favorite verses with beautiful visual cards, share reading progress milestones with friends, create shareable verse images with customizable designs, copy formatted verse text, share reading plan achievements, and view a feed of shared content from your reading community
+- **Purpose**: Encourage community engagement and spiritual growth by enabling users to easily share meaningful verses, celebrate reading milestones, and inspire others in their Bible study journey
+- **Trigger**: From Reader, tap Share icon on verse; from Reading Plans, tap Share Progress; from Social tab, view community feed; tap Create Image Card to design custom verse image
+- **Progression**: Reading verse → Tap Share icon → Choose share type (Text, Image Card, Progress) → For Image Card, select design template (Classic, Modern, Minimalist, Illuminated) and customize colors/fonts → Preview shareable content → Copy link or share to social platforms → Content appears in Social feed → Friends see shared verse or milestone → Tap to read full chapter or start similar plan → Like/comment on shared content → Track sharing statistics
+- **Success criteria**: Share dialog opens in <300ms; verse cards generate with high-quality design; multiple visual templates available; copy-to-clipboard works reliably; shareable links load quickly; progress milestones trigger automatic share prompts; social feed updates in real-time; images are optimized for social media platforms
+
+### 12. Curator/Admin Content Management
 - **Functionality**: Role-based tools for curators to edit metadata, alignment annotations, timeline events, and book introductions with versioned audit logs and reversible changes
 - **Purpose**: Maintain content quality and accuracy through community curation while ensuring all edits are transparent and reversible
 - **Trigger**: Admin users see "Edit" buttons throughout app; or Admin → Content Management dashboard
@@ -230,7 +237,7 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - TextAa (Typography settings)
   - Moon/Sun (Night mode)
   - Warning (Confidence labels, disputed content)
-  - ShareNetwork (Share passage)
+  - ShareNetwork (Share passage, social features)
   - ArrowsOutSimple (Expand comparison)
   - Funnel (Search filters)
   - Tag (Note tags)
@@ -240,6 +247,13 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - ArrowCounterClockwise (Reset plan)
   - CalendarBlank (Plan start date)
   - ListChecks (Progress tracking)
+  - Image (Create verse image card)
+  - Copy (Copy verse text)
+  - Heart (Like shared content)
+  - ChatCircle (Comment on shared content)
+  - Users (Social community feed)
+  - Trophy (Reading milestones)
+  - Export (Share progress)
 
 - **Spacing**: 
   - Consistent 4px base unit (Tailwind's default)
@@ -251,7 +265,7 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Navigation bar: 64px height on mobile for thumb-friendly bottom tabs, 240px width sidebar on desktop
 
 - **Mobile**:
-  - Bottom tab bar (64px height) with 7 main tabs: API Demo, Home, Library, Reading Plans, Compare, Search, Timeline
+  - Bottom tab bar (64px height) with 8 main tabs: API Demo, Home, Library, Reading Plans, Compare, Search, Timeline, Social
   - Collapsible settings panel slides up from bottom as Sheet
   - Reader uses full viewport with hidden controls (tap to reveal header/footer)
   - Compare view stacks translations vertically with sticky translation labels
@@ -262,5 +276,7 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Typography settings accessible via quick-access button in Reader header (always visible)
   - Reading Plans show daily readings in stacked cards with large completion buttons
   - Calendar view uses 7-column grid with touch-friendly day cells
-  - Desktop: Left sidebar navigation (240px) with persistent access to all sections including Reading Plans, main content area uses max-width 1200px with generous margins
+  - Social feed shows stacked share cards with verse text and engagement options
+  - Share dialog provides large tap targets for different share types
+  - Desktop: Left sidebar navigation (240px) with persistent access to all sections including Reading Plans and Social, main content area uses max-width 1200px with generous margins
 

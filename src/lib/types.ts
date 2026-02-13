@@ -224,3 +224,62 @@ export interface NotificationSettings {
   desktopNotifications: boolean
   missedDayReminders: boolean
 }
+
+export type ShareType = 'verse' | 'progress' | 'milestone' | 'plan'
+
+export type ImageCardTemplate = 'classic' | 'modern' | 'minimalist' | 'illuminated'
+
+export interface SharedVerse {
+  id: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  verseId: string
+  workId: string
+  bookName: string
+  chapterNumber: number
+  verseNumber: number
+  verseEndNumber?: number
+  verseText: string
+  translation: string
+  note?: string
+  imageTemplate?: ImageCardTemplate
+  imageDataUrl?: string
+  createdAt: number
+  likes: string[]
+  comments: SharedComment[]
+}
+
+export interface SharedProgress {
+  id: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  type: 'milestone' | 'plan-complete' | 'streak'
+  title: string
+  description: string
+  planName?: string
+  planId?: string
+  daysCompleted?: number
+  totalDays?: number
+  streakDays?: number
+  createdAt: number
+  likes: string[]
+  comments: SharedComment[]
+}
+
+export interface SharedComment {
+  id: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  content: string
+  createdAt: number
+}
+
+export interface ShareSettings {
+  autoShareMilestones: boolean
+  autoShareStreaks: boolean
+  shareToPublicFeed: boolean
+  allowComments: boolean
+}

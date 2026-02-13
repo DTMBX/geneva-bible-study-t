@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge'
 import { bibleBooks } from '@/lib/data'
 import type { UserProfile, VerseUnit, PassageReference } from '@/lib/types'
 import { generateChapterVerses } from '@/lib/verse-generator'
+import ShareDialog from '@/components/social/ShareDialog'
 
 interface ReaderViewProps {
   userProfile: UserProfile
@@ -18,6 +19,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   const [currentBookId, setCurrentBookId] = useState('gen')
   const [currentChapter, setCurrentChapter] = useState(1)
   const [selectedVerses, setSelectedVerses] = useState<number[]>([])
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
   
   const [lastReadPosition, setLastReadPosition] = useKV<PassageReference>('last-read-position', {
     workId: 'gen',
@@ -109,8 +111,26 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     setSelectedVerses([])
   }
 
+  const getSelectedVerseText = () => {
+    if (selectedVerses.length === 0) return ''
+    const sortedVerses = [...selectedVerses].sort((a, b) => a - b)
+    return sortedVerses
+      .map(vNum => verses.find(v => v.verseNumber === vNum)?.text || '')
+      .join(' ')
+  }
+
   return (
     <div className="h-full flex flex-col bg-background">
+      <ShareDialog
+        open={shareDialogOpen}
+        onOpenChange={setShareDialogOpen}
+        workId={currentBookId}
+        chapterNumber={currentChapter}
+        verseNumber={selectedVerses[0] || 1}
+        verseEndNumber={selectedVerses.length > 1 ? Math.max(...selectedVerses) : undefined}
+        verseText={getSelectedVerseText()}
+        translation={translationId}
+      />
       <div className="border-b border-border bg-card px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           <Select value={currentBookId} onValueChange={handleBookChange}>
@@ -147,6 +167,9 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         <div className="flex items-center gap-2">
           {selectedVerses.length > 0 && (
             <>
+              <Button variant="ghost" size="sm" onClick={() => setShareDialogOpen(true)}>
+                <ShareNetwork size={18} weight="duotone" />
+              </Button>
               <Button variant="ghost" size="sm">
                 <NotePencil size={18} weight="duotone" />
               </Button>

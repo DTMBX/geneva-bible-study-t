@@ -6,12 +6,13 @@ import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Calendar, CheckCircle, Circle, BookOpen, Play, Pause, ArrowCounterClockwise, CalendarBlank, ListChecks, Plus, Bell, Trash } from '@phosphor-icons/react'
+import { Calendar, CheckCircle, Circle, BookOpen, Play, Pause, ArrowCounterClockwise, CalendarBlank, ListChecks, Plus, Bell, Trash, ShareNetwork, Trophy } from '@phosphor-icons/react'
 import { readingPlans, getBookDisplayName } from '@/lib/reading-plans'
 import type { UserReadingPlan, ReadingPlan } from '@/lib/types'
 import { toast } from 'sonner'
 import CustomPlanBuilder from './CustomPlanBuilder'
 import NotificationSettingsPanel from './NotificationSettingsPanel'
+import ShareProgressDialog from '@/components/social/ShareProgressDialog'
 
 interface ReadingPlanViewProps {
   onNavigateToReader?: (bookId: string, chapter: number) => void
@@ -23,6 +24,17 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null)
   const [showCustomPlanBuilder, setShowCustomPlanBuilder] = useState(false)
   const [showNotifications, setShowNotifications] = useState(false)
+  const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [shareDialogData, setShareDialogData] = useState<{
+    type: 'milestone' | 'plan-complete' | 'streak'
+    title: string
+    description: string
+    planName?: string
+    planId?: string
+    daysCompleted?: number
+    totalDays?: number
+    streakDays?: number
+  } | null>(null)
 
   const allPlans = [...readingPlans, ...(customPlans || [])]
   const selectedUserPlan = activeUserPlans?.find(p => p.planId === selectedPlanId)
@@ -85,6 +97,8 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
   }
 
   const markDayComplete = (day: number) => {
+    const wasCompleted = selectedUserPlan?.completedDays.includes(day) || false
+    
     setActiveUserPlans(current => 
       (current || []).map(plan => {
         if (plan.planId === selectedPlanId) {
@@ -103,10 +117,46 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
       })
     )
     
-    toast.success(activeUserPlans.find(p => p.planId === selectedPlanId)?.completedDays.includes(day) 
-      ? 'Day marked incomplete' 
-      : 'Day completed! 🎉'
-    )
+    if (!wasCompleted) {
+      const newCompletedCount = (selectedUserPlan?.completedDays.length || 0) + 1
+      const totalDays = selectedPlan?.duration || 0
+      
+      if (newCompletedCount === totalDays) {
+        setShareDialogData({
+          type: 'plan-complete',
+          title: 'Reading Plan Complete!',
+          description: `You've completed the ${selectedPlan?.name} reading plan!`,
+          planName: selectedPlan?.name,
+          planId: selectedPlanId || undefined,
+          daysCompleted: totalDays,
+          totalDays: totalDays
+        })
+        setShareDialogOpen(true)
+      } else if (newCompletedCount % 7 === 0) {
+        setShareDialogData({
+          type: 'streak',
+          title: `${newCompletedCount} Days Complete!`,
+          description: `You've maintained your reading streak for ${newCompletedCount} days!`,
+          planName: selectedPlan?.name,
+          streakDays: newCompletedCount
+        })
+        setShareDialogOpen(true)
+      } else if ([30, 50, 100].includes(newCompletedCount)) {
+        setShareDialogData({
+          type: 'milestone',
+          title: `${newCompletedCount} Days Milestone!`,
+          description: `You've completed ${newCompletedCount} days of reading!`,
+          planName: selectedPlan?.name,
+          daysCompleted: newCompletedCount,
+          totalDays: totalDays
+        })
+        setShareDialogOpen(true)
+      }
+      
+      toast.success('Day completed! 🎉')
+    } else {
+      toast.success('Day marked incomplete')
+    }
   }
 
   const togglePause = () => {
@@ -162,7 +212,22 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
 
   if (!selectedPlanId || !selectedPlan || !selectedUserPlan) {
     return (
-      <div className="container mx-auto p-6 max-w-6xl">
+      <>
+        {shareDialogOpen && shareDialogData && (
+          <ShareProgressDialog
+            open={shareDialogOpen}
+            onOpenChange={setShareDialogOpen}
+            type={shareDialogData.type}
+            title={shareDialogData.title}
+            description={shareDialogData.description}
+            planName={shareDialogData.planName}
+            planId={shareDialogData.planId}
+            daysCompleted={shareDialogData.daysCompleted}
+            totalDays={shareDialogData.totalDays}
+            streakDays={shareDialogData.streakDays}
+          />
+        )}
+        <div className="container mx-auto p-6 max-w-6xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 text-primary" style={{ fontFamily: 'var(--font-heading)' }}>
             Reading Plans
@@ -295,7 +360,8 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
             })}
           </div>
         </div>
-      </div>
+        </div>
+      </>
     )
   }
 
@@ -304,7 +370,22 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
   const daysElapsed = getDaysElapsed()
 
   return (
-    <div className="container mx-auto p-6 max-w-6xl">
+    <>
+      {shareDialogOpen && shareDialogData && (
+        <ShareProgressDialog
+          open={shareDialogOpen}
+          onOpenChange={setShareDialogOpen}
+          type={shareDialogData.type}
+          title={shareDialogData.title}
+          description={shareDialogData.description}
+          planName={shareDialogData.planName}
+          planId={shareDialogData.planId}
+          daysCompleted={shareDialogData.daysCompleted}
+          totalDays={shareDialogData.totalDays}
+          streakDays={shareDialogData.streakDays}
+        />
+      )}
+      <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
         <Button variant="ghost" onClick={() => setSelectedPlanId(null)} className="mb-4">
           ← Back to Plans
@@ -318,6 +399,25 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
             <p className="text-muted-foreground">{selectedPlan.description}</p>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => {
+                setShareDialogData({
+                  type: 'milestone',
+                  title: `${selectedUserPlan.completedDays.length} Days Complete`,
+                  description: `Making progress through ${selectedPlan.name}`,
+                  planName: selectedPlan.name,
+                  planId: selectedPlanId || undefined,
+                  daysCompleted: selectedUserPlan.completedDays.length,
+                  totalDays: selectedPlan.duration
+                })
+                setShareDialogOpen(true)
+              }}
+            >
+              <ShareNetwork size={16} weight="duotone" />
+              <span className="ml-2">Share</span>
+            </Button>
             <Button variant="outline" size="sm" onClick={togglePause}>
               {selectedUserPlan.paused ? (
                 <>
@@ -527,6 +627,7 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
         onClose={() => setShowCustomPlanBuilder(false)}
         onCreatePlan={handleCreateCustomPlan}
       />
-    </div>
+      </div>
+    </>
   )
 }
