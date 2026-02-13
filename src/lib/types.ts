@@ -546,6 +546,9 @@ export interface AudioBookmark {
   playbackRate: number
   note?: string
   tags?: string[]
+  voiceAnnotationUrl?: string
+  voiceAnnotationDuration?: number
+  voiceAnnotationCreatedAt?: number
   createdAt: number
   lastPlayedAt?: number
   playCount: number

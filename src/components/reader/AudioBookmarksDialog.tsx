@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookmarkSimple, Play, Trash, NotePencil, Tag, MagnifyingGlass, SortAscending, X } from '@phosphor-icons/react'
+import { BookmarkSimple, Play, Trash, NotePencil, Tag, MagnifyingGlass, SortAscending, X, Microphone, SpeakerHigh, Stop as StopIcon } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,8 +10,10 @@ import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import VoiceAnnotationRecorder from '@/components/reader/VoiceAnnotationRecorder'
 import type { AudioBookmark } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
+import { toast } from 'sonner'
 
 interface AudioBookmarksDialogProps {
   open: boolean
@@ -32,6 +34,9 @@ export default function AudioBookmarksDialog({
   const [editTags, setEditTags] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'most-played' | 'book'>('recent')
+  const [recordingVoiceFor, setRecordingVoiceFor] = useState<string | null>(null)
+  const [playingVoiceFor, setPlayingVoiceFor] = useState<string | null>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const userBookmarks = (bookmarks || []).filter(b => b.userId === currentUserId)
 
@@ -110,6 +115,87 @@ export default function AudioBookmarksDialog({
     )
     onPlayBookmark(bookmark)
     onOpenChange(false)
+  }
+
+  const handleSaveVoiceAnnotation = async (bookmarkId: string, audioBlob: Blob, duration: number) => {
+    try {
+      const audioUrl = URL.createObjectURL(audioBlob)
+      
+      setBookmarks(current =>
+        (current || []).map(b =>
+          b.id === bookmarkId
+            ? {
+                ...b,
+                voiceAnnotationUrl: audioUrl,
+                voiceAnnotationDuration: duration,
+                voiceAnnotationCreatedAt: Date.now()
+              }
+            : b
+        )
+      )
+      
+      setRecordingVoiceFor(null)
+      toast.success('Voice annotation saved successfully!')
+    } catch (error) {
+      console.error('Error saving voice annotation:', error)
+      toast.error('Failed to save voice annotation')
+    }
+  }
+
+  const handlePlayVoiceAnnotation = (bookmark: AudioBookmark) => {
+    if (!bookmark.voiceAnnotationUrl) return
+
+    if (playingVoiceFor === bookmark.id) {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+      setPlayingVoiceFor(null)
+      return
+    }
+
+    if (audioRef.current) {
+      audioRef.current.pause()
+    }
+
+    const audio = new Audio(bookmark.voiceAnnotationUrl)
+    audioRef.current = audio
+
+    audio.onended = () => {
+      setPlayingVoiceFor(null)
+      audioRef.current = null
+    }
+
+    audio.play()
+    setPlayingVoiceFor(bookmark.id)
+  }
+
+  const handleDeleteVoiceAnnotation = (bookmarkId: string) => {
+    if (playingVoiceFor === bookmarkId && audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+      setPlayingVoiceFor(null)
+    }
+
+    setBookmarks(current =>
+      (current || []).map(b =>
+        b.id === bookmarkId
+          ? {
+              ...b,
+              voiceAnnotationUrl: undefined,
+              voiceAnnotationDuration: undefined,
+              voiceAnnotationCreatedAt: undefined
+            }
+          : b
+      )
+    )
+    toast.success('Voice annotation deleted')
+  }
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60)
+    const secs = seconds % 60
+    return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
   return (
@@ -213,7 +299,15 @@ export default function AudioBookmarksDialog({
                           "{bookmark.verseText}"
                         </p>
 
-                        {editingId === bookmark.id ? (
+                        {recordingVoiceFor === bookmark.id ? (
+                          <div className="mt-3">
+                            <VoiceAnnotationRecorder
+                              onSave={(blob, duration) => handleSaveVoiceAnnotation(bookmark.id, blob, duration)}
+                              onCancel={() => setRecordingVoiceFor(null)}
+                              existingAnnotationUrl={bookmark.voiceAnnotationUrl}
+                            />
+                          </div>
+                        ) : editingId === bookmark.id ? (
                           <div className="flex flex-col gap-2 mt-3">
                             <Textarea
                               placeholder="Add a note..."
@@ -258,6 +352,63 @@ export default function AudioBookmarksDialog({
                                   </Badge>
                                 ))}
                               </div>
+                            )}
+                            
+                            {bookmark.voiceAnnotationUrl && (
+                              <Card className="p-3 mb-2 bg-accent/10 border-accent/20">
+                                <div className="flex items-center justify-between gap-3">
+                                  <div className="flex items-center gap-2">
+                                    <Microphone size={18} weight="fill" className="text-accent" />
+                                    <div className="text-sm">
+                                      <p className="font-medium">Voice Annotation</p>
+                                      <p className="text-xs text-muted-foreground">
+                                        {bookmark.voiceAnnotationDuration ? formatTime(bookmark.voiceAnnotationDuration) : '0:00'}
+                                        {bookmark.voiceAnnotationCreatedAt && (
+                                          <> • Recorded {formatDistanceToNow(bookmark.voiceAnnotationCreatedAt, { addSuffix: true })}</>
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant={playingVoiceFor === bookmark.id ? "default" : "outline"}
+                                      onClick={() => handlePlayVoiceAnnotation(bookmark)}
+                                    >
+                                      {playingVoiceFor === bookmark.id ? (
+                                        <>
+                                          <StopIcon size={16} weight="fill" className="mr-1" />
+                                          Stop
+                                        </>
+                                      ) : (
+                                        <>
+                                          <SpeakerHigh size={16} weight="fill" className="mr-1" />
+                                          Listen
+                                        </>
+                                      )}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => handleDeleteVoiceAnnotation(bookmark.id)}
+                                    >
+                                      <Trash size={16} />
+                                    </Button>
+                                  </div>
+                                </div>
+                              </Card>
+                            )}
+                            
+                            {!bookmark.voiceAnnotationUrl && !recordingVoiceFor && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full mb-2"
+                                onClick={() => setRecordingVoiceFor(bookmark.id)}
+                              >
+                                <Microphone size={16} weight="fill" className="mr-2" />
+                                Add Voice Annotation
+                              </Button>
                             )}
                           </>
                         )}
