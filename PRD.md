@@ -2,13 +2,23 @@
 
 A scholarly, offline-capable Bible study application that positions the Geneva Bible as the primary reading text while enabling effortless translation comparison, historical exploration, and understanding of how the biblical canon formed across traditions.
 
+**Platform Support**: Universal cross-platform application
+- ✅ **Web Desktop**: Full-featured experience on Chrome, Firefox, Safari, Edge (90+)
+- ✅ **Web Mobile**: Responsive, touch-optimized interface for all mobile browsers
+- ✅ **iOS (Safari)**: Progressive Web App with Add to Home Screen capability (iOS 11.3+)
+- ✅ **Android (Chrome)**: Installable PWA with enhanced notifications and background audio (Android 5.0+)
+- 🔄 **Windows Desktop**: PWA installation + future Electron app with widget support
+- 🔄 **macOS**: PWA installation + future native app
+- 🔄 **Linux**: Browser access + future AppImage/Snap/Flatpak packages
+
 **Experience Qualities**:
 1. **Scholarly yet accessible** - Present deep research and historical context without academic jargon, making biblical history approachable for curious newcomers while satisfying serious students
 2. **Reverent neutrality** - Respect the text's significance across traditions while maintaining objectivity about translation differences, canon debates, and historical context without theological bias
 3. **Typography-first clarity** - Prioritize distraction-free reading with exceptional typography, allowing the ancient texts to speak without visual noise or feature clutter
+4. **Universal accessibility** - Seamless experience across all devices and platforms with optimized touch interactions, responsive layouts, and platform-specific enhancements
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This application requires sophisticated data modeling for multi-translation alignment, powerful full-text search across multiple corpora, timeline visualization, offline data synchronization, role-based content curation, and deep-linked navigation across thousands of interconnected passages and historical events.
+This application requires sophisticated data modeling for multi-translation alignment, powerful full-text search across multiple corpora, timeline visualization, offline data synchronization, role-based content curation, deep-linked navigation across thousands of interconnected passages and historical events, and cross-platform compatibility with platform-specific optimizations for iOS, Android, Windows, macOS, and Linux.
 
 ## Bible API Integration
 

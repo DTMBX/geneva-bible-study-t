@@ -2,6 +2,34 @@
 
 A scholarly, offline-capable Bible study application that positions the Geneva Bible as the primary reading text while enabling effortless translation comparison, historical exploration, and understanding of how the biblical canon formed across traditions.
 
+## 🌍 Universal Platform Support
+
+**Stable and optimized for all devices and platforms:**
+
+| Platform | Status | Installation Method |
+|----------|--------|---------------------|
+| **🌐 Web Desktop** | ✅ Ready | Open in any modern browser |
+| **📱 Web Mobile** | ✅ Ready | Responsive design, works everywhere |
+| **🍎 iOS** | ✅ Ready | Safari → Share → Add to Home Screen |
+| **🤖 Android** | ✅ Ready | Chrome → Install app prompt |
+| **🪟 Windows** | ✅ Ready | Edge/Chrome → Install button + Widget guide |
+| **🍏 macOS** | ✅ Ready | Safari/Chrome → Install app |
+| **🐧 Linux** | ✅ Ready | Any browser + future native packages |
+
+### Progressive Web App (PWA) Features
+- ✅ **Installable**: Works as standalone app on all platforms
+- ✅ **Offline Support**: Read Bible without internet
+- ✅ **Fast Loading**: Optimized performance on all devices
+- ✅ **Responsive**: Adapts to any screen size
+- ✅ **Touch-Optimized**: Perfect for mobile and tablet
+- ✅ **Cross-Platform Sync**: Data persists across devices
+
+### Platform-Specific Enhancements
+- **iOS**: Full-screen mode, safe area support, optimized touch targets (44x44pt)
+- **Android**: Background audio, rich notifications, share target integration
+- **Windows**: Desktop widget guide, PWA installation, future Electron app
+- **All Platforms**: Dark mode scheduling, voice features, offline caching
+
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/deploy.yml?branch=main)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions)
 [![Lighthouse CI](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/lighthouse-ci.yml?branch=main&label=lighthouse)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/lighthouse-ci.yml)
