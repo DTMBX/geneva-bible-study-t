@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
@@ -6,13 +7,15 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck, Bell } from '@phosphor-icons/react'
+import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck, Bell, Keyboard } from '@phosphor-icons/react'
 import { translations } from '@/lib/data'
 import type { UserProfile } from '@/lib/types'
 import CommunityProfileSettings from '@/components/social/CommunityProfileSettings'
 import ModeratorTestPanel from '@/components/social/ModeratorTestPanel'
 import VerseOfDayNotifications from './VerseOfDayNotifications'
+import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog'
 
 interface SettingsViewProps {
   userProfile: UserProfile
@@ -20,6 +23,7 @@ interface SettingsViewProps {
 
 export default function SettingsView({ userProfile: initialProfile }: SettingsViewProps) {
   const [userProfile, setUserProfile] = useKV<UserProfile>('user-profile', initialProfile)
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
 
   const updatePreference = <K extends keyof UserProfile['preferences']>(
     key: K,
@@ -55,6 +59,10 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <TabsTrigger value="notifications" className="gap-2">
             <Bell size={16} weight="duotone" />
             Notifications
+          </TabsTrigger>
+          <TabsTrigger value="accessibility" className="gap-2">
+            <Keyboard size={16} weight="duotone" />
+            Accessibility
           </TabsTrigger>
           <TabsTrigger value="community" className="gap-2">
             <Users size={16} weight="duotone" />
@@ -308,6 +316,97 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <VerseOfDayNotifications />
         </TabsContent>
 
+        <TabsContent value="accessibility" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Keyboard size={24} weight="duotone" className="text-primary" />
+                Accessibility Features
+              </CardTitle>
+              <CardDescription>
+                Features to help make the app more accessible
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2">Voice-to-Text Messaging</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Record voice messages in conversations and group chats. The app will automatically transcribe your audio to text, which you can review and edit before sending.
+                  </p>
+                  <Badge variant="default">Active</Badge>
+                </div>
+
+                <Separator />
+
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2">Editable Transcriptions</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    All AI-generated transcriptions (voice annotations, voice messages) can be edited for accuracy. Original transcriptions are preserved for reference.
+                  </p>
+                  <Badge variant="default">Active</Badge>
+                </div>
+
+                <Separator />
+
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2 flex items-center justify-between">
+                    <span>Keyboard Shortcuts</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowKeyboardShortcuts(true)}
+                      className="gap-2"
+                    >
+                      <Keyboard size={16} />
+                      View Shortcuts
+                    </Button>
+                  </h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Navigate the app efficiently using keyboard shortcuts. Press Ctrl+/ (⌘+/ on Mac) anytime to view all shortcuts.
+                  </p>
+                  <div className="flex gap-2 flex-wrap mt-2">
+                    <Badge variant="secondary">Ctrl+K - Search</Badge>
+                    <Badge variant="secondary">1-9 - Switch Tabs</Badge>
+                    <Badge variant="secondary">Space - Play/Pause</Badge>
+                    <Badge variant="secondary">Escape - Go Back</Badge>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2">Screen Reader Support</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    All interactive elements include proper ARIA labels and semantic HTML for screen reader compatibility.
+                  </p>
+                  <Badge variant="default">Active</Badge>
+                </div>
+
+                <Separator />
+
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2">High Contrast Mode</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    The app respects your system's high contrast settings and maintains WCAG AA contrast ratios (4.5:1) throughout the interface.
+                  </p>
+                  <Badge variant="default">Active</Badge>
+                </div>
+
+                <Separator />
+
+                <div className="p-4 bg-muted/50 rounded-md">
+                  <h4 className="font-semibold mb-2">Adjustable Typography</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Customize font size (12-28px) and line spacing (1.0-2.5) in the Reading settings tab for comfortable long-form reading.
+                  </p>
+                  <Badge variant="default">Active</Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="community">
           <CommunityProfileSettings />
         </TabsContent>
@@ -316,6 +415,11 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <ModeratorTestPanel />
         </TabsContent>
       </Tabs>
+
+      <KeyboardShortcutsDialog
+        open={showKeyboardShortcuts}
+        onOpenChange={setShowKeyboardShortcuts}
+      />
     </div>
   )
 }

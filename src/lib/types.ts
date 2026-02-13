@@ -551,6 +551,9 @@ export interface AudioBookmark {
   voiceAnnotationCreatedAt?: number
   voiceAnnotationTranscription?: string
   voiceAnnotationTranscribedAt?: number
+  voiceAnnotationOriginalTranscription?: string
+  voiceAnnotationEditedAt?: number
+  voiceAnnotationConfidence?: number
   createdAt: number
   lastPlayedAt?: number
   playCount: number

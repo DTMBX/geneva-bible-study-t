@@ -330,6 +330,9 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - CaretUp/CaretDown (Volume/speed adjustment)
   - Microphone (Voice annotation recording)
   - Stop (Stop recording/playback)
+  - PencilSimple (Edit transcription)
+  - ArrowCounterClockwise (Revert transcription edits)
+  - Waveform (Audio visualization, voice message)
 
 - **Spacing**: 
   - Consistent 4px base unit (Tailwind's default)
@@ -355,4 +358,44 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Social feed shows stacked share cards with verse text and engagement options
   - Share dialog provides large tap targets for different share types
   - Desktop: Left sidebar navigation (240px) with persistent access to all sections including Reading Plans and Social, main content area uses max-width 1200px with generous margins
+
+## Accessibility Features
+
+The application includes comprehensive accessibility features to serve users with diverse needs:
+
+### Voice-to-Text Message Composition
+- **Functionality**: Record voice messages in direct messages and group chats with automatic AI transcription
+- **Purpose**: Enable hands-free message composition for accessibility and convenience
+- **Trigger**: Tap microphone icon in message input area
+- **Progression**: Tap mic → Record message → Stop recording → AI transcribes audio → Review and edit transcription → Send message
+- **Success criteria**: Clear recording interface; accurate transcription (>80% confidence); easy editing workflow; seamless integration with messaging
+
+### Editable Transcriptions
+- **Functionality**: Edit AI-generated transcriptions from voice annotations and voice messages to correct errors
+- **Purpose**: Ensure accuracy of transcribed content and allow users to refine AI-generated text
+- **Trigger**: Tap edit icon on any transcription
+- **Progression**: View transcription → Tap edit → Modify text in editor → Compare with original → Save changes → See edited badge
+- **Success criteria**: Non-destructive editing (original preserved); clear indication of edits; ability to revert to original; audio playback available during editing
+
+### Voice Annotations with Transcription
+- **Functionality**: Record voice reflections on Bible passages, auto-transcribe to searchable text, edit transcriptions for accuracy
+- **Purpose**: Enable audio-first study and note-taking while maintaining text searchability
+- **Trigger**: From audio bookmarks, tap "Add Voice Annotation"
+- **Progression**: Bookmark passage → Record voice note → Save audio → Tap transcribe → AI converts to text → Edit transcription if needed → Search annotations by text → Convert to permanent text note
+- **Success criteria**: Audio saves reliably; transcription completes in <10s; edits preserve audio link; transcriptions are searchable; confidence score displayed
+
+### Screen Reader Optimization
+- **Functionality**: Proper ARIA labels, semantic HTML, keyboard navigation support
+- **Purpose**: Enable full app functionality for screen reader users
+- **Success criteria**: All interactive elements labeled; logical tab order; announced state changes; descriptive error messages
+
+### Keyboard Navigation
+- **Functionality**: Complete keyboard shortcuts for all major actions
+- **Purpose**: Enable power users and accessibility users to navigate efficiently
+- **Success criteria**: Tab navigation works throughout; Enter/Space trigger actions; Escape closes dialogs; shortcuts documented
+
+### High Contrast Support
+- **Functionality**: UI respects system high contrast settings and maintains WCAG AA contrast ratios
+- **Purpose**: Support users with low vision
+- **Success criteria**: All text meets 4.5:1 contrast minimum; focus indicators clearly visible; UI elements distinguishable
 

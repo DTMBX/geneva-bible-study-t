@@ -1,14 +1,21 @@
 import { useState, useEffect, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { ArrowLeft, PaperPlaneTilt, BookOpen, X, Sparkle } from '@phosphor-icons/react'
+import { ArrowLeft, PaperPlaneTilt, BookOpen, X, Sparkle, Microphone } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Textarea } from '@/components/ui/textarea'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import type { Message, Conversation } from '@/lib/types'
 import { format, formatDistanceToNow } from 'date-fns'
+import VoiceMessageComposer from './VoiceMessageComposer'
 
 interface MessageThreadProps {
   conversationId: string
@@ -28,6 +35,7 @@ export default function MessageThread({
   const [conversations, setConversations] = useKV<Conversation[]>('conversations', [])
   const [messages, setMessages] = useKV<Message[]>('messages', [])
   const [messageText, setMessageText] = useState('')
+  const [showVoiceComposer, setShowVoiceComposer] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [currentUserName, setCurrentUserName] = useState<string>('')
   const [conversationId, setConversationId] = useState(initialConversationId)
@@ -94,12 +102,18 @@ export default function MessageThread({
   const handleSendMessage = async () => {
     if (!messageText.trim() || !currentUserId) return
 
+    sendMessage(messageText.trim())
+  }
+
+  const sendMessage = (content: string) => {
+    if (!content.trim() || !currentUserId) return
+
     const newMessage: Message = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       conversationId: conversationId || `conv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       fromUserId: currentUserId,
       toUserId: friendId,
-      content: messageText.trim(),
+      content: content.trim(),
       createdAt: Date.now()
     }
 
@@ -150,6 +164,11 @@ export default function MessageThread({
 
     setMessages((current = []) => [...current, newMessage])
     setMessageText('')
+  }
+
+  const handleVoiceMessageSend = (text: string) => {
+    sendMessage(text)
+    setShowVoiceComposer(false)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -286,27 +305,57 @@ export default function MessageThread({
 
       <div className="p-4 border-t bg-card">
         <div className="max-w-3xl mx-auto">
-          <div className="flex gap-2">
-            <Textarea
-              placeholder={`Message ${friendName}...`}
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="min-h-[60px] max-h-[120px] resize-none"
-              rows={2}
+          {showVoiceComposer ? (
+            <VoiceMessageComposer
+              onSend={handleVoiceMessageSend}
+              onCancel={() => setShowVoiceComposer(false)}
+              placeholder="Voice transcription will appear here..."
             />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!messageText.trim()}
-              size="icon"
-              className="h-[60px] w-[60px] flex-shrink-0"
-            >
-              <PaperPlaneTilt size={20} weight="fill" />
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-2">
-            Press Enter to send, Shift+Enter for new line
-          </p>
+          ) : (
+            <>
+              <div className="flex gap-2">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setShowVoiceComposer(true)}
+                        className="h-[60px] w-[60px] flex-shrink-0"
+                        aria-label="Send voice message"
+                      >
+                        <Microphone size={20} weight="duotone" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Send voice message</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <Textarea
+                  placeholder={`Message ${friendName}...`}
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="min-h-[60px] max-h-[120px] resize-none"
+                  rows={2}
+                  aria-label="Message input"
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!messageText.trim()}
+                  size="icon"
+                  className="h-[60px] w-[60px] flex-shrink-0"
+                  aria-label="Send message"
+                >
+                  <PaperPlaneTilt size={20} weight="fill" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Press Enter to send, Shift+Enter for new line • Click mic for voice message
+              </p>
+            </>
+          )}
         </div>
       </div>
     </div>

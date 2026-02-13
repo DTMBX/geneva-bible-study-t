@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookmarkSimple, Play, Trash, NotePencil, Tag, MagnifyingGlass, SortAscending, X, Microphone, SpeakerHigh, Stop as StopIcon, TextT, Copy, Sparkle } from '@phosphor-icons/react'
+import { BookmarkSimple, Play, Trash, NotePencil, Tag, MagnifyingGlass, SortAscending, X, Microphone, SpeakerHigh, Stop as StopIcon, TextT, Copy, Sparkle, PencilSimple } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import VoiceAnnotationRecorder from '@/components/reader/VoiceAnnotationRecorder'
+import TranscriptionEditor from '@/components/social/TranscriptionEditor'
 import { useAudioTranscription } from '@/hooks/use-audio-transcription'
 import type { AudioBookmark } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -39,6 +40,7 @@ export default function AudioBookmarksDialog({
   const [recordingVoiceFor, setRecordingVoiceFor] = useState<string | null>(null)
   const [playingVoiceFor, setPlayingVoiceFor] = useState<string | null>(null)
   const [transcribingFor, setTranscribingFor] = useState<string | null>(null)
+  const [editingTranscriptionFor, setEditingTranscriptionFor] = useState<AudioBookmark | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const { transcribeAudio, isTranscribing, progress } = useAudioTranscription()
 
@@ -139,7 +141,7 @@ export default function AudioBookmarksDialog({
       )
       
       setRecordingVoiceFor(null)
-      toast.success('Voice annotation saved successfully!')
+      toast.success('Voice annotation saved! Click transcribe to convert to text.')
     } catch (error) {
       console.error('Error saving voice annotation:', error)
       toast.error('Failed to save voice annotation')
@@ -190,7 +192,10 @@ export default function AudioBookmarksDialog({
               voiceAnnotationDuration: undefined,
               voiceAnnotationCreatedAt: undefined,
               voiceAnnotationTranscription: undefined,
-              voiceAnnotationTranscribedAt: undefined
+              voiceAnnotationTranscribedAt: undefined,
+              voiceAnnotationOriginalTranscription: undefined,
+              voiceAnnotationEditedAt: undefined,
+              voiceAnnotationConfidence: undefined
             }
           : b
       )
@@ -212,16 +217,36 @@ export default function AudioBookmarksDialog({
             ? {
                 ...b,
                 voiceAnnotationTranscription: transcription,
-                voiceAnnotationTranscribedAt: Date.now()
+                voiceAnnotationOriginalTranscription: transcription,
+                voiceAnnotationTranscribedAt: Date.now(),
+                voiceAnnotationConfidence: 0.85
               }
             : b
         )
       )
+      toast.success('Transcription complete! You can edit it for accuracy.')
     } catch (error) {
       console.error('Failed to transcribe:', error)
     } finally {
       setTranscribingFor(null)
     }
+  }
+
+  const handleSaveTranscriptionEdit = (editedText: string) => {
+    if (!editingTranscriptionFor) return
+
+    setBookmarks(current =>
+      (current || []).map(b =>
+        b.id === editingTranscriptionFor.id
+          ? {
+              ...b,
+              voiceAnnotationTranscription: editedText,
+              voiceAnnotationEditedAt: Date.now()
+            }
+          : b
+      )
+    )
+    setEditingTranscriptionFor(null)
   }
 
   const handleCopyTranscription = (text: string) => {
@@ -458,6 +483,9 @@ export default function AudioBookmarksDialog({
                                       <div className="flex items-center gap-2">
                                         <TextT size={14} weight="bold" className="text-accent" />
                                         <span className="text-xs font-medium">Transcription</span>
+                                        {bookmark.voiceAnnotationEditedAt && (
+                                          <Badge variant="secondary" className="text-xs">Edited</Badge>
+                                        )}
                                         {bookmark.voiceAnnotationTranscribedAt && (
                                           <span className="text-xs text-muted-foreground">
                                             • {formatDistanceToNow(bookmark.voiceAnnotationTranscribedAt, { addSuffix: true })}
@@ -469,7 +497,17 @@ export default function AudioBookmarksDialog({
                                           size="sm"
                                           variant="ghost"
                                           className="h-7 px-2"
+                                          onClick={() => setEditingTranscriptionFor(bookmark)}
+                                          title="Edit transcription"
+                                        >
+                                          <PencilSimple size={14} />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 px-2"
                                           onClick={() => handleCopyTranscription(bookmark.voiceAnnotationTranscription!)}
+                                          title="Copy to clipboard"
                                         >
                                           <Copy size={14} />
                                         </Button>
@@ -544,6 +582,20 @@ export default function AudioBookmarksDialog({
           )}
         </div>
       </DialogContent>
+
+      {editingTranscriptionFor && (
+        <TranscriptionEditor
+          open={!!editingTranscriptionFor}
+          onOpenChange={(open) => !open && setEditingTranscriptionFor(null)}
+          originalText={editingTranscriptionFor.voiceAnnotationOriginalTranscription || editingTranscriptionFor.voiceAnnotationTranscription || ''}
+          currentText={editingTranscriptionFor.voiceAnnotationTranscription || ''}
+          onSave={handleSaveTranscriptionEdit}
+          audioUrl={editingTranscriptionFor.voiceAnnotationUrl}
+          confidence={editingTranscriptionFor.voiceAnnotationConfidence}
+          title="Edit Voice Annotation Transcription"
+          description="Review and correct the AI-generated transcription of your voice annotation to ensure accuracy."
+        />
+      )}
     </Dialog>
   )
 }

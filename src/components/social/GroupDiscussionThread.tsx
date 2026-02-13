@@ -7,6 +7,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -44,7 +50,8 @@ import {
   PencilSimple,
   Trash,
   Gear,
-  ShieldCheck
+  ShieldCheck,
+  Microphone
 } from '@phosphor-icons/react'
 import type { GroupDiscussion, GroupMessage } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -52,6 +59,7 @@ import { toast } from 'sonner'
 import GroupInfoDialog from './GroupInfoDialog'
 import InviteMembersDialog from './InviteMembersDialog'
 import GroupAdminSettingsDialog from './GroupAdminSettingsDialog'
+import VoiceMessageComposer from './VoiceMessageComposer'
 import {
   getUserRole,
   canPostMessages,
@@ -87,6 +95,7 @@ export default function GroupDiscussionThread({
   const [groups = [], setGroups] = useKV<GroupDiscussion[]>('group-discussions', [])
   const [messages = [], setMessages] = useKV<GroupMessage[]>(`group-messages-${groupId}`, [])
   const [newMessage, setNewMessage] = useState('')
+  const [showVoiceComposer, setShowVoiceComposer] = useState(false)
   const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null)
   const [deletingMessage, setDeletingMessage] = useState<{ id: string; content: string } | null>(null)
   const [showReactionPicker, setShowReactionPicker] = useState<string | null>(null)
@@ -137,12 +146,18 @@ export default function GroupDiscussionThread({
       return
     }
 
+    sendGroupMessage(newMessage.trim())
+  }
+
+  const sendGroupMessage = (content: string) => {
+    if (!content.trim() || !group) return
+
     const message: GroupMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       groupId,
       fromUserId: currentUserId,
       fromUserName: currentUserName,
-      content: newMessage.trim(),
+      content: content.trim(),
       createdAt: Date.now(),
       reactions: {}
     }
@@ -166,6 +181,11 @@ export default function GroupDiscussionThread({
     )
 
     setNewMessage('')
+  }
+
+  const handleVoiceMessageSend = (text: string) => {
+    sendGroupMessage(text)
+    setShowVoiceComposer(false)
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -703,23 +723,52 @@ export default function GroupDiscussionThread({
 
       <div className="border-t bg-card p-4">
         {canPost ? (
-          <div className="flex gap-2 max-w-4xl mx-auto">
-            <Input
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              className="flex-1"
-            />
-            <Button
-              onClick={handleSendMessage}
-              disabled={!newMessage.trim()}
-              className="gap-2"
-            >
-              <PaperPlaneRight size={18} weight="fill" />
-              Send
-            </Button>
-          </div>
+          showVoiceComposer ? (
+            <div className="max-w-4xl mx-auto">
+              <VoiceMessageComposer
+                onSend={handleVoiceMessageSend}
+                onCancel={() => setShowVoiceComposer(false)}
+                placeholder="Voice transcription will appear here..."
+              />
+            </div>
+          ) : (
+            <div className="flex gap-2 max-w-4xl mx-auto">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setShowVoiceComposer(true)}
+                      aria-label="Send voice message"
+                    >
+                      <Microphone size={20} weight="duotone" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Send voice message</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              <Input
+                placeholder="Type a message..."
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                className="flex-1"
+                aria-label="Message input"
+              />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!newMessage.trim()}
+                className="gap-2"
+                aria-label="Send message"
+              >
+                <PaperPlaneRight size={18} weight="fill" />
+                Send
+              </Button>
+            </div>
+          )
         ) : (
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-200">

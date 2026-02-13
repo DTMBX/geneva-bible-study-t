@@ -5,6 +5,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useKeyboardShortcuts } from '@/hooks/use-keyboard-shortcuts'
+import KeyboardShortcutsDialog from '@/components/KeyboardShortcutsDialog'
 import HomeView from '@/components/views/HomeView'
 import LibraryView from '@/components/views/LibraryView'
 import CompareView from '@/components/views/CompareView'
@@ -22,6 +24,7 @@ import type { UserProfile, FriendRequest, Conversation, GroupDiscussion } from '
 function App() {
   const isMobile = useIsMobile()
   const [activeTab, setActiveTab] = useState('home')
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false)
   
   const [userProfile] = useKV<UserProfile>('user-profile', {
     id: 'default-user',
@@ -83,6 +86,72 @@ function App() {
     setActiveTab('groups')
   }
 
+  useKeyboardShortcuts([
+    {
+      key: '/',
+      ctrl: true,
+      description: 'Show keyboard shortcuts',
+      action: () => setShowKeyboardShortcuts(true)
+    },
+    {
+      key: ',',
+      ctrl: true,
+      description: 'Open settings',
+      action: () => setActiveTab('settings')
+    },
+    {
+      key: 'k',
+      ctrl: true,
+      description: 'Open search',
+      action: () => setActiveTab('search')
+    },
+    {
+      key: '1',
+      description: 'Go to Home',
+      action: () => setActiveTab('home')
+    },
+    {
+      key: '2',
+      description: 'Go to Reader',
+      action: () => setActiveTab('reader')
+    },
+    {
+      key: '3',
+      description: 'Go to Library',
+      action: () => setActiveTab('library')
+    },
+    {
+      key: '4',
+      description: 'Go to Compare',
+      action: () => setActiveTab('compare')
+    },
+    {
+      key: '5',
+      description: 'Go to Search',
+      action: () => setActiveTab('search')
+    },
+    {
+      key: '6',
+      description: 'Go to Timeline',
+      action: () => setActiveTab('timeline')
+    },
+    {
+      key: '7',
+      description: 'Go to Reading Plans',
+      action: () => setActiveTab('reading-plan')
+    },
+    {
+      key: '8',
+      description: 'Go to Social',
+      action: () => setActiveTab('social')
+    },
+    {
+      key: '9',
+      description: 'Go to Messages',
+      action: () => setActiveTab('messages')
+    }
+  ])
+
   return (
     <div className="h-screen flex flex-col bg-background">
       <header className="border-b border-border bg-card px-4 py-3 flex items-center justify-between">
@@ -107,6 +176,7 @@ function App() {
           <button
             onClick={() => setActiveTab('settings')}
             className="p-2 hover:bg-muted rounded-md transition-colors"
+            aria-label="Settings"
           >
             <Gear size={24} weight="duotone" className="text-muted-foreground" />
           </button>
@@ -331,6 +401,11 @@ function App() {
           )}
         </Tabs>
       </div>
+
+      <KeyboardShortcutsDialog
+        open={showKeyboardShortcuts}
+        onOpenChange={setShowKeyboardShortcuts}
+      />
     </div>
   )
 }
