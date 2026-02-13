@@ -149,7 +149,7 @@ export function useAudioNarrators(): AudioNarrator[] {
     },
     {
       id: 'voice-7',
-      name: extra1?.name.split(' ')[0] || 'Reader 7',
+      name: extra1?.name ? extra1.name.split(' ')[0] : 'Reader 7',
       description: 'Additional narrator option for variety',
       gender: isLikelyFemale(extra1 || voices[0]) ? 'female' : 'male',
       accent: extra1?.lang.includes('GB') ? 'british' : extra1?.lang.includes('AU') ? 'australian' : 'american',
@@ -159,7 +159,7 @@ export function useAudioNarrators(): AudioNarrator[] {
     },
     {
       id: 'voice-8',
-      name: extra2?.name.split(' ')[0] || 'Reader 8',
+      name: extra2?.name ? extra2.name.split(' ')[0] : 'Reader 8',
       description: 'Additional narrator option for variety',
       gender: isLikelyFemale(extra2 || voices[0]) ? 'female' : 'male',
       accent: extra2?.lang.includes('GB') ? 'british' : extra2?.lang.includes('AU') ? 'australian' : 'american',
