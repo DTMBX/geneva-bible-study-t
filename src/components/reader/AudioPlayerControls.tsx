@@ -212,18 +212,46 @@ export default function AudioPlayerControls({
 
             <div className="flex items-center gap-2">
               <span className="text-xs text-muted-foreground min-w-[60px]">Speed:</span>
-              <div className="flex-1 flex items-center gap-2">
-                <Slider
-                  value={[playbackState.playbackRate]}
-                  onValueChange={([value]) => onPlaybackRateChange(value)}
-                  min={0.5}
-                  max={2.0}
-                  step={0.1}
-                  className="flex-1"
-                />
-                <span className="text-xs text-muted-foreground min-w-[40px] text-right">
-                  {playbackState.playbackRate.toFixed(1)}x
-                </span>
+              <div className="flex-1 flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant={playbackState.playbackRate === 0.75 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onPlaybackRateChange(0.75)}
+                    className="flex-1 h-7 text-xs"
+                  >
+                    Slow
+                  </Button>
+                  <Button
+                    variant={playbackState.playbackRate === 1.0 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onPlaybackRateChange(1.0)}
+                    className="flex-1 h-7 text-xs"
+                  >
+                    Normal
+                  </Button>
+                  <Button
+                    variant={playbackState.playbackRate === 1.5 ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => onPlaybackRateChange(1.5)}
+                    className="flex-1 h-7 text-xs"
+                  >
+                    Fast
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Slider
+                    value={[playbackState.playbackRate]}
+                    onValueChange={([value]) => onPlaybackRateChange(value)}
+                    min={0.5}
+                    max={2.0}
+                    step={0.1}
+                    className="flex-1"
+                  />
+                  <span className="text-xs text-muted-foreground min-w-[40px] text-right">
+                    {playbackState.playbackRate.toFixed(1)}x
+                  </span>
+                </div>
               </div>
             </div>
 
