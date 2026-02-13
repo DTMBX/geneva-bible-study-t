@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useIsMobile } from '@/hooks/use-mobile'
 import HomeView from '@/components/views/HomeView'
@@ -10,11 +10,12 @@ import SearchView from '@/components/views/SearchView'
 import TimelineView from '@/components/views/TimelineView'
 import SettingsView from '@/components/views/SettingsView'
 import ReaderView from '@/components/reader/ReaderView'
+import BibleApiDemo from '@/components/BibleApiDemo'
 import type { UserProfile } from '@/lib/types'
 
 function App() {
   const isMobile = useIsMobile()
-  const [activeTab, setActiveTab] = useState('home')
+  const [activeTab, setActiveTab] = useState('api-demo')
   
   const [userProfile] = useKV<UserProfile>('user-profile', {
     id: 'default-user',
@@ -56,6 +57,9 @@ function App() {
           {isMobile ? (
             <>
               <div className="flex-1 overflow-auto">
+                <TabsContent value="api-demo" className="mt-0 h-full">
+                  <BibleApiDemo />
+                </TabsContent>
                 <TabsContent value="home" className="mt-0 h-full">
                   <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
                 </TabsContent>
@@ -79,7 +83,11 @@ function App() {
                 </TabsContent>
               </div>
 
-              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-5 bg-card">
+              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-6 bg-card">
+                <TabsTrigger value="api-demo" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <Code size={24} weight="duotone" />
+                  <span className="text-xs">API</span>
+                </TabsTrigger>
                 <TabsTrigger value="home" className="flex-col gap-1 data-[state=active]:text-primary">
                   <BookOpen size={24} weight="duotone" />
                   <span className="text-xs">Home</span>
@@ -105,6 +113,10 @@ function App() {
           ) : (
             <div className="flex h-full">
               <TabsList className="w-60 flex-col gap-2 p-4 rounded-none border-r bg-card items-stretch justify-start h-full">
+                <TabsTrigger value="api-demo" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <Code size={24} weight="duotone" />
+                  <span>API Demo</span>
+                </TabsTrigger>
                 <TabsTrigger value="home" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <BookOpen size={24} weight="duotone" />
                   <span>Home</span>
@@ -137,6 +149,9 @@ function App() {
               </TabsList>
 
               <div className="flex-1 overflow-auto">
+                <TabsContent value="api-demo" className="mt-0 h-full">
+                  <BibleApiDemo />
+                </TabsContent>
                 <TabsContent value="home" className="mt-0 h-full">
                   <HomeView userProfile={userProfile} onNavigateToReader={() => setActiveTab('reader')} />
                 </TabsContent>

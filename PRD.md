@@ -10,6 +10,34 @@ A scholarly, offline-capable Bible study application that positions the Geneva B
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
 This application requires sophisticated data modeling for multi-translation alignment, powerful full-text search across multiple corpora, timeline visualization, offline data synchronization, role-based content curation, and deep-linked navigation across thousands of interconnected passages and historical events.
 
+## Bible API Integration
+
+The application integrates with the **Bolls Life Bible API** (https://bolls.life) to source authentic Bible text. This API provides:
+
+- **License**: Public Domain content
+- **No Attribution Required**: Fully permissive for non-commercial and commercial use
+- **Available Translations**: 
+  - Geneva Bible (1560) - Public Domain
+  - King James Version (1611) - Public Domain  
+  - World English Bible - Public Domain
+  - And 30+ other translations
+- **Features**:
+  - Fetch individual verses
+  - Fetch complete chapters
+  - Search across translations
+  - Multiple translation comparison
+  - No API key required
+  - Free unlimited access
+
+The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in `/src/hooks/use-bible-api.ts` for easy consumption throughout the application.
+
+**API Endpoints Used**:
+- `GET /get-verse/{translation}/{chapter}/{verse}/{book}/` - Fetch single verse
+- `GET /get-chapter/{translation}/{chapter}/{book}/` - Fetch complete chapter
+- `GET /search/{translation}/{query}/` - Search Bible text
+
+**Caching Strategy**: Chapter data is cached in local KV storage to minimize API calls and enable offline functionality for previously viewed content.
+
 ## Essential Features
 
 ### 1. Geneva Bible Primary Reader
