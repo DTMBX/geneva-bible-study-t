@@ -31,11 +31,27 @@ jobs:
       
       - name: Install dependencies
         run: npm ci
+        env:
+          HUSKY: 0
       
       - name: Build application
         run: npm run build
         env:
           NODE_ENV: production
+          GITHUB_ACTIONS: true
+      
+      - name: Verify build output
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Error: dist directory not found"
+            exit 1
+          fi
+          if [ ! -f "dist/index.html" ]; then
+            echo "Error: dist/index.html not found"
+            exit 1
+          fi
+          echo "Build verification passed"
+          ls -la dist/
       
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -56,3 +72,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      - name: Output deployment URL
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "📱 Site URL: ${{ steps.deployment.outputs.page_url }}"

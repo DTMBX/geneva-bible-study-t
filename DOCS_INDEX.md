@@ -7,8 +7,20 @@ Complete documentation for the Geneva Bible Study Platform.
 New to the project? Start here:
 
 1. **[README.md](./README.md)** - Project overview, quick start, and key features
-2. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - How to deploy to various platforms
-3. **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Guidelines for contributing code
+2. **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - ⚡ 5-minute deployment guide
+3. **[DEPLOYMENT.md](./DEPLOYMENT.md)** - How to deploy to various platforms
+4. **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Guidelines for contributing code
+
+## 📦 Deployment Documentation
+
+### Quick Start
+- **[QUICK_DEPLOY.md](./QUICK_DEPLOY.md)** - Fast deployment in 5 minutes ⚡
+- **[GITHUB_PAGES_DEPLOYMENT.md](./GITHUB_PAGES_DEPLOYMENT.md)** - Complete GitHub Pages guide
+- **[DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)** - Comprehensive checklist
+
+### Setup Scripts
+- `setup-github-pages.sh` - Automated setup (Linux/Mac)
+- `setup-github-pages.bat` - Automated setup (Windows)
 
 ## 📖 Core Documentation
 

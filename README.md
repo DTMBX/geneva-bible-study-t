@@ -2,8 +2,13 @@
 
 A scholarly, offline-capable Bible study application that positions the Geneva Bible as the primary reading text while enabling effortless translation comparison, historical exploration, and understanding of how the biblical canon formed across traditions.
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Build Status](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/deploy.yml?branch=main)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/deploy.yml?branch=main)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions)
+[![GitHub Pages](https://img.shields.io/badge/deployed%20on-GitHub%20Pages-brightgreen)](https://YOUR_USERNAME.github.io/YOUR_REPO/)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+
+> **🚀 Quick Deploy:** Get live in 5 minutes! See [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
 
 ## ✨ Features
 
@@ -53,34 +58,55 @@ npm run preview
 
 ## 📦 Deployment
 
-### GitHub Pages (Automated)
+### 🚀 GitHub Pages (Automated) - Recommended
 
-This project includes a GitHub Actions workflow for automatic deployment to GitHub Pages.
+This project includes a pre-configured GitHub Actions workflow for automatic deployment.
 
-**Setup Instructions:**
+**Quick Setup (5 Minutes):**
 
-1. **Enable GitHub Pages:**
-   - Go to your repository Settings
-   - Navigate to Pages section
-   - Under "Build and deployment", select "GitHub Actions" as the source
-
-2. **Push to Main Branch:**
+1. **Run Setup Script:**
    ```bash
+   # Linux/Mac
+   chmod +x setup-github-pages.sh
+   ./setup-github-pages.sh
+   
+   # Windows
+   setup-github-pages.bat
+   ```
+   
+   Or manually update:
+   - `vite.config.ts`: Change base path to `/YOUR_REPO/`
+   - `package.json`: Update repository URLs
+
+2. **Enable GitHub Pages:**
+   - Go to Settings → Pages
+   - Source: Select "GitHub Actions"
+
+3. **Deploy:**
+   ```bash
+   git add .
+   git commit -m "Configure for GitHub Pages"
    git push origin main
    ```
 
-3. **Access Your Site:**
-   - Your site will be available at: `https://YOUR_USERNAME.github.io/YOUR_REPO/`
-   - Check the Actions tab to monitor deployment progress
+4. **Access:**
+   - Monitor: [Actions tab]
+   - Live site: `https://YOUR_USERNAME.github.io/YOUR_REPO/`
 
-### Manual Deployment
+**📖 Detailed Guide:** See [GITHUB_PAGES_DEPLOYMENT.md](./GITHUB_PAGES_DEPLOYMENT.md)
 
-The `dist` folder after building can be deployed to any static hosting service:
+**✅ Checklist:** Use [DEPLOYMENT_CHECKLIST.md](./DEPLOYMENT_CHECKLIST.md)
+
+### Alternative Hosting
+
+The `dist` folder can be deployed to any static hosting service:
 
 - **Vercel:** `vercel --prod`
-- **Netlify:** Drag and drop `dist` folder
+- **Netlify:** Drag and drop `dist` folder  
 - **Firebase:** `firebase deploy`
-- **AWS S3:** Upload `dist` contents to S3 bucket
+- **AWS S3:** Upload `dist` contents
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed guides.
 
 ## 📚 API Integration
 

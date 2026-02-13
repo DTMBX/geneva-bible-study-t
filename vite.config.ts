@@ -10,6 +10,7 @@ const projectRoot = process.env.PROJECT_ROOT || import.meta.dirname
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.GITHUB_ACTIONS ? '/spark-template/' : '/',
   plugins: [
     react(),
     tailwindcss(),
@@ -21,5 +22,19 @@ export default defineConfig({
     alias: {
       '@': resolve(projectRoot, 'src')
     }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'ui-vendor': ['@radix-ui/react-dialog', '@radix-ui/react-popover', '@radix-ui/react-select'],
+          'phosphor-icons': ['@phosphor-icons/react'],
+        },
+      },
+    },
   },
 });

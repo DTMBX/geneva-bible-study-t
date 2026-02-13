@@ -32,7 +32,9 @@
         "build": "tsc -b --noCheck && vite build",
         "lint": "eslint .",
         "optimize": "vite optimize",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "predeploy": "npm run build",
+        "deploy:manual": "gh-pages -d dist"
     },
     "dependencies": {
         "@github/spark": ">=0.43.1 <1",
