@@ -43,7 +43,8 @@ import {
   X,
   PencilSimple,
   Trash,
-  Gear
+  Gear,
+  ShieldCheck
 } from '@phosphor-icons/react'
 import type { GroupDiscussion, GroupMessage } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -720,8 +721,19 @@ export default function GroupDiscussionThread({
             </Button>
           </div>
         ) : (
-          <div className="text-center text-muted-foreground text-sm py-2 max-w-4xl mx-auto">
-            Only admins and moderators can post messages in this group
+          <div className="max-w-4xl mx-auto">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-200">
+              <ShieldCheck size={24} weight="fill" className="text-amber-600 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-700">
+                  Restricted Group
+                </p>
+                <p className="text-xs text-amber-600">
+                  Only admins and moderators can post messages in this group. 
+                  {userRole === 'member' && ' Ask an admin to promote you to moderator to participate.'}
+                </p>
+              </div>
+            </div>
           </div>
         )}
       </div>

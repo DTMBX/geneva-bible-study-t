@@ -196,6 +196,14 @@ export default function GroupAdminSettingsDialog({
                       }
                     />
                   </div>
+                  {!settings.anyoneCanPost && (
+                    <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-200">
+                      <p className="text-sm text-amber-700 flex items-center gap-2">
+                        <ShieldCheck size={16} weight="fill" />
+                        <strong>Restricted Group:</strong> Only admins and moderators can post messages
+                      </p>
+                    </div>
+                  )}
 
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
@@ -221,6 +229,15 @@ export default function GroupAdminSettingsDialog({
                 <h3 className="text-sm font-semibold mb-4">
                   Member Management ({group.members.length})
                 </h3>
+                
+                <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                  <p className="text-sm text-muted-foreground">
+                    💡 <strong>Testing Moderator Permissions:</strong> Promote a member to moderator to see 
+                    their enhanced capabilities. Moderators can post in restricted groups, pin/unpin messages, 
+                    delete any message, and invite members. Use the Permissions tab in Settings to test access.
+                  </p>
+                </div>
+
                 <div className="space-y-2">
                   {group.members
                     .sort((a, b) => {

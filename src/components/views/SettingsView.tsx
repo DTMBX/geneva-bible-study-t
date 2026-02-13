@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gear, TextAa, Moon, DownloadSimple, Users } from '@phosphor-icons/react'
+import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck } from '@phosphor-icons/react'
 import { translations } from '@/lib/data'
 import type { UserProfile } from '@/lib/types'
 import CommunityProfileSettings from '@/components/social/CommunityProfileSettings'
+import ModeratorTestPanel from '@/components/social/ModeratorTestPanel'
 
 interface SettingsViewProps {
   userProfile: UserProfile
@@ -53,6 +54,10 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <TabsTrigger value="community" className="gap-2">
             <Users size={16} weight="duotone" />
             Community
+          </TabsTrigger>
+          <TabsTrigger value="permissions" className="gap-2">
+            <ShieldCheck size={16} weight="duotone" />
+            Permissions
           </TabsTrigger>
         </TabsList>
 
@@ -296,6 +301,10 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
 
         <TabsContent value="community">
           <CommunityProfileSettings />
+        </TabsContent>
+
+        <TabsContent value="permissions" className="space-y-6">
+          <ModeratorTestPanel />
         </TabsContent>
       </Tabs>
     </div>

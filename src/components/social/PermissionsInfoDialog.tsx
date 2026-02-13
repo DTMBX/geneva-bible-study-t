@@ -217,17 +217,36 @@ export default function PermissionsInfoDialog({
 
             <div className="bg-muted/30 border border-border rounded-lg p-4">
               <h4 className="font-semibold mb-2">Note on Group Settings</h4>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-sm text-muted-foreground mb-3">
                 Some permissions are affected by group settings:
               </p>
-              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+              <ul className="text-sm text-muted-foreground space-y-2 list-disc list-inside">
                 <li>
-                  <strong>Anyone can post:</strong> When disabled, only Admins and Moderators can post messages
+                  <strong>Anyone can post (Unrestricted):</strong> When enabled, all members can post messages freely
+                </li>
+                <li>
+                  <strong>Restricted Group:</strong> When "Anyone can post" is disabled, only Admins and Moderators can send messages. This is useful for announcement channels or moderated discussions.
                 </li>
                 <li>
                   <strong>Allow member invites:</strong> When disabled, only Admins can invite new members
                 </li>
               </ul>
+            </div>
+
+            <div className="bg-amber-500/10 border border-amber-200 rounded-lg p-4">
+              <h4 className="font-semibold mb-2 flex items-center gap-2 text-amber-700">
+                <ShieldCheck size={18} weight="fill" />
+                Testing Moderator Permissions
+              </h4>
+              <p className="text-sm text-amber-700 mb-2">
+                Want to see moderator permissions in action? Here's how:
+              </p>
+              <ol className="text-sm text-amber-700 space-y-1 list-decimal list-inside">
+                <li>Create a restricted group (disable "Anyone can post")</li>
+                <li>Have an admin promote you to moderator in Admin Settings</li>
+                <li>Try posting messages, pinning content, and deleting messages</li>
+                <li>Use the Moderator Test Panel to verify your permissions</li>
+              </ol>
             </div>
           </div>
         </ScrollArea>

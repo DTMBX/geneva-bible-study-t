@@ -17,7 +17,8 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Globe, Users, Lock } from '@phosphor-icons/react'
+import { Switch } from '@/components/ui/switch'
+import { Globe, Users, Lock, ShieldCheck } from '@phosphor-icons/react'
 import type { GroupDiscussion, UserConnection } from '@/lib/types'
 import { toast } from 'sonner'
 
@@ -37,6 +38,7 @@ export default function CreateGroupDialog({ open, onOpenChange }: CreateGroupDia
   const [topic, setTopic] = useState('')
   const [privacy, setPrivacy] = useState<'public' | 'friends-only' | 'invite-only'>('friends-only')
   const [selectedMembers, setSelectedMembers] = useState<string[]>([])
+  const [restrictedPosting, setRestrictedPosting] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -86,7 +88,7 @@ export default function CreateGroupDialog({ open, onOpenChange }: CreateGroupDia
       pinnedMessageIds: [],
       settings: {
         allowInvites: true,
-        anyoneCanPost: true,
+        anyoneCanPost: !restrictedPosting,
         moderationEnabled: false
       }
     }
@@ -100,6 +102,7 @@ export default function CreateGroupDialog({ open, onOpenChange }: CreateGroupDia
     setTopic('')
     setPrivacy('friends-only')
     setSelectedMembers([])
+    setRestrictedPosting(false)
     onOpenChange(false)
   }
 
@@ -217,6 +220,28 @@ export default function CreateGroupDialog({ open, onOpenChange }: CreateGroupDia
                   </div>
                 </div>
               </RadioGroup>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Group Settings</Label>
+              <div className="flex items-center justify-between p-3 rounded-lg border">
+                <div className="space-y-0.5 flex-1">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck size={18} weight="fill" className="text-amber-500" />
+                    <Label htmlFor="restricted-posting" className="font-medium cursor-pointer">
+                      Restricted Group
+                    </Label>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Only admins and moderators can post messages
+                  </p>
+                </div>
+                <Switch
+                  id="restricted-posting"
+                  checked={restrictedPosting}
+                  onCheckedChange={setRestrictedPosting}
+                />
+              </div>
             </div>
 
             <div className="space-y-3">

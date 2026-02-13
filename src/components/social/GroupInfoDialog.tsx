@@ -136,10 +136,10 @@ export default function GroupInfoDialog({
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowPermissions(true)}
-                  className="gap-2"
+                  className="gap-2 text-primary"
                 >
                   <Info size={16} weight="fill" />
-                  Role Permissions
+                  Role Permissions Guide
                 </Button>
               </div>
               <div className="space-y-2">

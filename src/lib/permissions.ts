@@ -176,10 +176,53 @@ export function getRoleDisplayName(role: GroupRole): string {
 export function getRoleDescription(role: GroupRole): string {
   const descriptions: Record<GroupRole, string> = {
     admin: 'Full control over group settings, members, and content',
-    moderator: 'Can moderate content, pin messages, and invite members',
+    moderator: 'Can moderate content, pin messages, delete messages, and invite members',
     member: 'Can participate in discussions and react to messages',
   }
   return descriptions[role]
+}
+
+export function getPermissionsByRole(role: GroupRole): Permission[] {
+  return ROLE_PERMISSIONS[role]
+}
+
+export function getAllPermissions(): Permission[] {
+  return [
+    'manage_group',
+    'delete_group',
+    'manage_members',
+    'change_roles',
+    'remove_members',
+    'invite_members',
+    'update_settings',
+    'pin_messages',
+    'unpin_messages',
+    'delete_any_message',
+    'edit_any_message',
+    'post_messages',
+    'react_to_messages',
+    'view_messages',
+  ]
+}
+
+export function getPermissionLabel(permission: Permission): string {
+  const labels: Record<Permission, string> = {
+    manage_group: 'Manage Group',
+    delete_group: 'Delete Group',
+    manage_members: 'Manage Members',
+    change_roles: 'Change Roles',
+    remove_members: 'Remove Members',
+    invite_members: 'Invite Members',
+    update_settings: 'Update Settings',
+    pin_messages: 'Pin Messages',
+    unpin_messages: 'Unpin Messages',
+    delete_any_message: 'Delete Any Message',
+    edit_any_message: 'Edit Any Message',
+    post_messages: 'Post Messages',
+    react_to_messages: 'React to Messages',
+    view_messages: 'View Messages',
+  }
+  return labels[permission]
 }
 
 export function canPromoteToRole(

@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Plus, UsersThree, MagnifyingGlass, Lock, Users, Globe, PushPin } from '@phosphor-icons/react'
+import { Plus, UsersThree, MagnifyingGlass, Lock, Users, Globe, PushPin, ShieldCheck } from '@phosphor-icons/react'
 import type { GroupDiscussion } from '@/lib/types'
 import CreateGroupDialog from './CreateGroupDialog'
 import { formatDistanceToNow } from 'date-fns'
@@ -183,6 +183,12 @@ export default function GroupDiscussionsList({ onSelectGroup }: GroupDiscussions
                         {group.topic && (
                           <Badge variant="outline" className="mt-2 text-xs">
                             {group.topic}
+                          </Badge>
+                        )}
+                        {!group.settings.anyoneCanPost && (
+                          <Badge variant="outline" className="mt-2 text-xs bg-amber-500/10 text-amber-700 border-amber-200">
+                            <ShieldCheck size={12} weight="fill" className="mr-1" />
+                            Restricted
                           </Badge>
                         )}
                       </div>
