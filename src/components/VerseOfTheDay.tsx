@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Share, BookmarkSimple, Copy, Check, ChatCircle, UsersThree, Heart, BookOpen } from '@phosphor-icons/react'
+import { Share, BookmarkSimple, Copy, Check, ChatCircle, UsersThree, Heart, BookOpen, Translate } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { fetchVerse } from '@/lib/bibleApi'
 import { bibleBooks } from '@/lib/data'
@@ -27,6 +28,19 @@ interface VerseOfTheDayProps {
   onNavigateToMessages?: (friendId: string, verseRef: any) => void
 }
 
+const AVAILABLE_TRANSLATIONS = [
+  { id: 'kjv', name: 'King James Version (KJV)' },
+  { id: 'web', name: 'World English Bible (WEB)' },
+  { id: 'bbe', name: 'Bible in Basic English (BBE)' },
+  { id: 'ylt', name: "Young's Literal Translation (YLT)" },
+  { id: 'oeb-cw', name: 'Open English Bible (OEB)' },
+  { id: 'webbe', name: 'World English Bible, British Edition (WEBBE)' },
+  { id: 'wmb', name: 'World Messianic Bible (WMB)' },
+  { id: 'net', name: 'New English Translation (NET)' },
+  { id: 'lsg', name: 'Louis Segond (LSG) - French' },
+  { id: 'byz', name: 'Byzantine/Majority Text (BYZ) - Greek' },
+]
+
 export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavigateToMessages }: VerseOfTheDayProps) {
   const [verseData, setVerseData] = useState<VerseOfTheDayData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -38,6 +52,8 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
   const [groups = []] = useKV<GroupDiscussion[]>('group-discussions', [])
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [likedVerses = [], setLikedVerses] = useKV<string[]>('liked-verses-of-day', [])
+  const [selectedTranslation, setSelectedTranslation] = useState<string>(userProfile?.preferences?.defaultTranslation || 'kjv')
+  const [isLoadingTranslation, setIsLoadingTranslation] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -50,6 +66,55 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
   useEffect(() => {
     loadVerseOfTheDay()
   }, [])
+
+  useEffect(() => {
+    if (verseData && selectedTranslation !== verseData.translation) {
+      loadVerseInTranslation(selectedTranslation)
+    }
+  }, [selectedTranslation])
+
+  const loadVerseInTranslation = async (translationId: string) => {
+    if (!verseData) return
+    
+    setIsLoadingTranslation(true)
+    try {
+      const today = new Date().toISOString().split('T')[0]
+      const cacheKey = `verse-of-day-${today}-${translationId}`
+      
+      const cachedVerse = await window.spark.kv.get<VerseOfTheDayData>(cacheKey)
+      if (cachedVerse) {
+        setVerseData(cachedVerse)
+        setIsLoadingTranslation(false)
+        return
+      }
+
+      const verseResult = await fetchVerse({
+        translationId,
+        bookId: verseData.bookId,
+        chapter: verseData.chapter,
+        verse: verseData.verse
+      })
+
+      if (verseResult) {
+        const newVerseData: VerseOfTheDayData = {
+          date: today,
+          bookId: verseData.bookId,
+          chapter: verseData.chapter,
+          verse: verseData.verse,
+          text: verseResult.text,
+          translation: translationId
+        }
+        
+        await window.spark.kv.set(cacheKey, newVerseData)
+        setVerseData(newVerseData)
+      }
+    } catch (error) {
+      console.error('Failed to load translation:', error)
+      toast.error('Failed to load translation')
+    } finally {
+      setIsLoadingTranslation(false)
+    }
+  }
 
   const loadVerseOfTheDay = async () => {
     setIsLoading(true)
@@ -185,7 +250,8 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
     if (!verseData) return
     
     const book = bibleBooks.find(b => b.id === verseData.bookId)
-    const text = `"${verseData.text}"\n\n${book?.title} ${verseData.chapter}:${verseData.verse} (${verseData.translation.toUpperCase()})`
+    const translationName = AVAILABLE_TRANSLATIONS.find(t => t.id === verseData.translation)?.name || verseData.translation.toUpperCase()
+    const text = `"${verseData.text}"\n\n${book?.title} ${verseData.chapter}:${verseData.verse} (${translationName})`
     
     navigator.clipboard.writeText(text)
     setCopied(true)
@@ -251,7 +317,8 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
     if (!verseData) return
     
     const book = bibleBooks.find(b => b.id === verseData.bookId)
-    const message = `📖 Verse of the Day:\n\n"${verseData.text}"\n\n${book?.title} ${verseData.chapter}:${verseData.verse} (${verseData.translation.toUpperCase()})`
+    const translationName = AVAILABLE_TRANSLATIONS.find(t => t.id === verseData.translation)?.name || verseData.translation.toUpperCase()
+    const message = `📖 Verse of the Day:\n\n"${verseData.text}"\n\n${book?.title} ${verseData.chapter}:${verseData.verse} (${translationName})`
     
     toast.success(`Shared with ${group.name}`)
     setShareDialogOpen(false)
@@ -294,6 +361,7 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
   const book = bibleBooks.find(b => b.id === verseData.bookId)
   const verseKey = `${verseData.date}-${verseData.bookId}-${verseData.chapter}-${verseData.verse}`
   const isLiked = likedVerses.includes(verseKey)
+  const currentTranslationName = AVAILABLE_TRANSLATIONS.find(t => t.id === verseData.translation)?.name || verseData.translation.toUpperCase()
 
   return (
     <>
@@ -327,17 +395,39 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
         </CardHeader>
         <CardContent className="space-y-5">
           <div 
-            className="text-xl leading-relaxed cursor-pointer hover:text-accent transition-colors py-4 px-2"
+            className="text-xl leading-relaxed cursor-pointer hover:text-accent transition-colors py-4 px-2 relative"
             style={{ fontFamily: 'var(--font-body)', lineHeight: '1.8' }}
             onClick={handleReadInContext}
           >
+            {isLoadingTranslation && (
+              <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex items-center justify-center rounded-md">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="h-4 w-4 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+                  Loading translation...
+                </div>
+              </div>
+            )}
             "{verseData.text}"
           </div>
           
-          <div className="flex items-center justify-between py-2 px-2">
+          <div className="flex items-center justify-between gap-4 py-2 px-2 flex-wrap">
             <div className="text-base font-semibold text-primary">
               {book?.title} {verseData.chapter}:{verseData.verse}
-              <span className="ml-3 text-sm text-muted-foreground font-normal">({verseData.translation.toUpperCase()})</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Translate size={18} className="text-muted-foreground" weight="duotone" />
+              <Select value={selectedTranslation} onValueChange={setSelectedTranslation}>
+                <SelectTrigger className="w-[200px] h-9">
+                  <SelectValue placeholder="Select translation" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_TRANSLATIONS.map(translation => (
+                    <SelectItem key={translation.id} value={translation.id}>
+                      {translation.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -402,7 +492,7 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
             <div className="p-3 bg-muted rounded-md text-sm" style={{ fontFamily: 'var(--font-body)' }}>
               "{verseData.text}"
               <div className="mt-2 text-xs text-muted-foreground">
-                — {book?.title} {verseData.chapter}:{verseData.verse}
+                — {book?.title} {verseData.chapter}:{verseData.verse} ({currentTranslationName})
               </div>
             </div>
 
