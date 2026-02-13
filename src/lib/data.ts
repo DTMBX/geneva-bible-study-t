@@ -38,6 +38,258 @@ export const translations: TranslationEdition[] = [
     languageCode: 'en'
   },
   {
+    id: 'web',
+    name: 'World English Bible',
+    shortCode: 'WEB',
+    year: 2000,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Rainbow Missions'],
+    sourceTexts: ['Hebrew Biblia Hebraica Stuttgartensia', 'Greek Majority Text'],
+    revisionLineage: ['American Standard Version (1901)', 'WEB (2000)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'A modern English translation in the public domain, based on the American Standard Version. Uses contemporary English while maintaining formal equivalence to the original texts.',
+    languageCode: 'en'
+  },
+  {
+    id: 'ylt',
+    name: "Young's Literal Translation",
+    shortCode: 'YLT',
+    year: 1862,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 1,
+    editors: ['Robert Young'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Textus Receptus'],
+    revisionLineage: ['YLT (1862)', 'YLT Revised (1887)', 'YLT Third Edition (1898)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: "An extremely literal translation that attempts to preserve the tense and word usage of the original languages. Created by Robert Young, scholar and compiler of Young's Analytical Concordance.",
+    languageCode: 'en'
+  },
+  {
+    id: 'asv',
+    name: 'American Standard Version',
+    shortCode: 'ASV',
+    year: 1901,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['American Revision Committee'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Textus Receptus'],
+    revisionLineage: ['KJV (1611)', 'RV (1885)', 'ASV (1901)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'American revision of the English Revised Version, seeking to improve accuracy while maintaining the dignity of the KJV tradition. Known for its scholarly precision.',
+    languageCode: 'en'
+  },
+  {
+    id: 'basicenglish',
+    name: 'Bible in Basic English',
+    shortCode: 'BBE',
+    year: 1949,
+    philosophy: 'dynamic-equivalence',
+    philosophyScore: 6,
+    editors: ['S. H. Hooke'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Critical Text'],
+    revisionLineage: ['BBE (1949)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'Translated using only 850 basic English words plus 100 special Bible words. Designed for those learning English or seeking simple, clear language.',
+    languageCode: 'en'
+  },
+  {
+    id: 'darby',
+    name: 'Darby Translation',
+    shortCode: 'DARBY',
+    year: 1890,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['John Nelson Darby'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Critical Text'],
+    revisionLineage: ['Darby (1890)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'Created by John Nelson Darby, founder of the Plymouth Brethren movement. Known for careful attention to verb tenses and theological precision.',
+    languageCode: 'en'
+  },
+  {
+    id: 'douayrheims',
+    name: 'Douay-Rheims Bible',
+    shortCode: 'DRA',
+    year: 1609,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['English College, Douai'],
+    sourceTexts: ['Latin Vulgate'],
+    revisionLineage: ['Latin Vulgate (405)', 'Douay-Rheims (1609)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'The official English Bible of the Catholic Church for centuries, translated from the Latin Vulgate. Includes the Deuterocanonical books (Apocrypha).',
+    languageCode: 'en'
+  },
+  {
+    id: 'webster',
+    name: "Webster's Bible",
+    shortCode: 'WBT',
+    year: 1833,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Noah Webster'],
+    sourceTexts: ['KJV'],
+    revisionLineage: ['KJV (1611)', 'Webster (1833)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'A revision of the KJV by Noah Webster (of dictionary fame), updating archaic language and correcting perceived errors while maintaining the KJV style.',
+    languageCode: 'en'
+  },
+  {
+    id: 'akjv',
+    name: 'American King James Version',
+    shortCode: 'AKJV',
+    year: 1999,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Michael Phelps'],
+    sourceTexts: ['KJV'],
+    revisionLineage: ['KJV (1611)', 'AKJV (1999)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'An updated version of the KJV using modern American spelling and punctuation, placed in the public domain for free use.',
+    languageCode: 'en'
+  },
+  {
+    id: 'leb',
+    name: 'Lexham English Bible',
+    shortCode: 'LEB',
+    year: 2012,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Lexham Press'],
+    sourceTexts: ['Hebrew Biblia Hebraica Stuttgartensia', 'Greek Nestle-Aland 28'],
+    revisionLineage: ['LEB (2012)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'A modern literal translation designed to be used with Logos Bible Software, emphasizing transparency to the original languages.',
+    languageCode: 'en'
+  },
+  {
+    id: 'wb',
+    name: 'World Messianic Bible',
+    shortCode: 'WMB',
+    year: 2014,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Rainbow Missions'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Majority Text'],
+    revisionLineage: ['WEB (2000)', 'WMB (2014)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'Based on the World English Bible, using Messianic Jewish terminology and restoring Hebrew names and concepts.',
+    languageCode: 'en'
+  },
+  {
+    id: 'kjva',
+    name: 'King James Version with Apocrypha',
+    shortCode: 'KJVA',
+    year: 1611,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['47 scholars in six committees'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Textus Receptus', 'Latin Vulgate'],
+    revisionLineage: ['Tyndale (1526)', 'Bishops\' Bible (1568)', 'KJV (1611)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'The complete King James Version including the Deuterocanonical books (Apocrypha) originally included between the Old and New Testaments.',
+    languageCode: 'en'
+  },
+  {
+    id: 'clementine',
+    name: 'Clementine Vulgate',
+    shortCode: 'CLEMENTINE',
+    year: 1592,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Pope Clement VIII'],
+    sourceTexts: ['Original Latin Vulgate'],
+    revisionLineage: ['Vulgate (405)', 'Clementine (1592)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'The official Latin text of the Catholic Church from 1592 to 1979. A revision of the Vulgate authorized by Pope Clement VIII.',
+    languageCode: 'la'
+  },
+  {
+    id: 'almeida',
+    name: 'Almeida Revista e Corrigida',
+    shortCode: 'ARC',
+    year: 1898,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['João Ferreira de Almeida'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Textus Receptus'],
+    revisionLineage: ['Almeida (1681)', 'ARC (1898)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'Classic Portuguese Bible translation, the first complete Portuguese Bible and still widely used by Portuguese-speaking Protestants.',
+    languageCode: 'pt'
+  },
+  {
+    id: 'rst',
+    name: 'Russian Synodal Translation',
+    shortCode: 'RST',
+    year: 1876,
+    philosophy: 'formal-equivalence',
+    philosophyScore: 2,
+    editors: ['Russian Bible Society'],
+    sourceTexts: ['Hebrew Masoretic Text', 'Greek Textus Receptus', 'Septuagint'],
+    revisionLineage: ['Church Slavonic (1751)', 'RST (1876)'],
+    license: 'Public Domain',
+    licenseRestrictions: {
+      offlineAllowed: true,
+      fullTextAllowed: true
+    },
+    description: 'The standard Russian Bible translation, authorized by the Russian Orthodox Church and used by Russian-speaking Christians worldwide.',
+    languageCode: 'ru'
+  },
+  {
     id: 'esv',
     name: 'English Standard Version',
     shortCode: 'ESV',

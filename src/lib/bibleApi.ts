@@ -17,16 +17,34 @@ export const bibleApiSources: BibleApiSource[] = [
     translationMapping: {
       'geneva': 'geneva',
       'kjv': 'kjv',
-      'web': 'web'
-    }
-  },
-  {
-    id: 'ajaxapi',
-    name: 'AJAX Bible API',
-    baseUrl: 'https://ajax.googleapis.com/ajax/services/language/translate',
-    license: 'Public Domain',
-    translationMapping: {
-      'kjv': 'kjv'
+      'web': 'web',
+      'ylt': 'ylt',
+      'asv': 'asv',
+      'basicenglish': 'basicenglish',
+      'darby': 'darby',
+      'douayrheims': 'douayrheims',
+      'webster': 'webster',
+      'akjv': 'akjv',
+      'leb': 'leb',
+      'rnkjv': 'rnkjv',
+      'emphbbl': 'emphbbl',
+      'wb': 'wb',
+      'clementine': 'clementine',
+      'almeida': 'almeida',
+      'rccv': 'rccv',
+      'byz': 'byz',
+      'elzevir': 'elzevir',
+      'kjva': 'kjva',
+      'tisch': 'tisch',
+      'tr': 'tr',
+      'wh': 'wh',
+      'lxx': 'lxx',
+      'synodal': 'synodal',
+      'rst': 'rst',
+      'macarther': 'macarther',
+      'finpr': 'finpr',
+      'danish': 'danish',
+      'esperanto': 'esperanto'
     }
   }
 ]

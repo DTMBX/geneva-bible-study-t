@@ -2,7 +2,7 @@
 
 ## Overview
 
-This application integrates with the **Bolls Life Bible API** to provide authentic, verified Bible text from public domain sources. This API offers free, unlimited access to 30+ Bible translations without requiring API keys or attribution.
+This application integrates with the **Bolls Life Bible API** to provide authentic, verified Bible text from public domain sources. This API offers free, unlimited access to 16+ public domain Bible translations with complete Old and New Testament coverage (66 books), without requiring API keys or attribution.
 
 ## API Source Details
 
@@ -17,24 +17,29 @@ This application integrates with the **Bolls Life Bible API** to provide authent
 
 ### Available Public Domain Translations
 
-The following translations are available with full text access and no restrictions:
+All translations below are available with full text access for Old and New Testament:
 
-1. **Geneva Bible (1560)** - `geneva`
-   - The Bible of the Protestant Reformation
-   - Extensive marginal notes with Reformed theology
-   - Public Domain
+#### English Translations
+1. **Geneva Bible (1560)** - `geneva` - The Bible of the Protestant Reformation with Reformed theology notes
+2. **King James Version (1611)** - `kjv` - Most influential English Bible with majestic prose
+3. **King James Version with Apocrypha (1611)** - `kjva` - Complete KJV including Deuterocanonical books
+4. **World English Bible (2000)** - `web` - Modern public domain translation
+5. **Young's Literal Translation (1862)** - `ylt` - Extremely literal word-for-word translation
+6. **American Standard Version (1901)** - `asv` - Scholarly American revision of the KJV
+7. **Bible in Basic English (1949)** - `basicenglish` - Simple English using only 850 basic words
+8. **Darby Translation (1890)** - `darby` - Precise translation by Plymouth Brethren founder
+9. **Douay-Rheims Bible (1609)** - `douayrheims` - Catholic Bible translated from Latin Vulgate
+10. **Webster's Bible (1833)** - `webster` - Noah Webster's KJV revision with modern language
+11. **American King James Version (1999)** - `akjv` - KJV with modern American spelling
+12. **Lexham English Bible (2012)** - `leb` - Modern literal translation emphasizing transparency
+13. **World Messianic Bible (2014)** - `wb` - WEB variant using Messianic Jewish terminology
 
-2. **King James Version (1611)** - `kjv`
-   - Most influential English Bible translation
-   - Majestic prose and poetic language
-   - Public Domain
+#### Other Language Translations
+14. **Clementine Vulgate (1592)** - `clementine` - Official Catholic Latin text
+15. **Almeida Revista e Corrigida (1898)** - `almeida` - Classic Portuguese translation
+16. **Russian Synodal Translation (1876)** - `rst` - Standard Russian Orthodox Bible
 
-3. **World English Bible** - `web`
-   - Modern English translation
-   - Based on ASV and Majority Text
-   - Public Domain / CC0
-
-4. **30+ Additional Translations** in multiple languages
+All translations include complete Old Testament (39 books) and New Testament (27 books), totaling 66 books in the Protestant canon. Some translations (KJVA, Douay-Rheims) also include the Deuterocanonical books.
 
 ## API Endpoints
 

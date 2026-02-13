@@ -41,7 +41,7 @@ export default function BibleApiDemo() {
           Bible API Integration Demo
         </h1>
         <p className="text-muted-foreground">
-          Demonstrating authentic Bible text from Bolls Life API - Public Domain, no attribution required
+          Demonstrating authentic Bible text from Bolls Life API - 16 Public Domain translations, Full Old & New Testament
         </p>
       </div>
 
@@ -50,13 +50,17 @@ export default function BibleApiDemo() {
           <CardHeader>
             <CardTitle>API Source: Bolls Life</CardTitle>
             <CardDescription>
-              Free, unlimited access to 30+ Bible translations
+              Free, unlimited access to 16+ public domain Bible translations - Full Old & New Testament
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
             <div className="flex items-center gap-2">
               <span className="font-medium">License:</span>
               <span className="text-sm text-muted-foreground">Public Domain</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium">Coverage:</span>
+              <span className="text-sm text-muted-foreground">Complete Old & New Testament (66 books)</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="font-medium">Attribution:</span>
@@ -77,18 +81,21 @@ export default function BibleApiDemo() {
           <CardHeader>
             <CardTitle>Available Translations</CardTitle>
             <CardDescription>
-              Public domain translations with full text access
+              {publicDomainTranslations.length} public domain translations with full Old & New Testament access
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-1">
-              {publicDomainTranslations.map((t) => (
-                <li key={t.id} className="text-sm flex items-center gap-2">
-                  <BookOpen size={16} className="text-primary" weight="duotone" />
-                  <span>{t.name} ({t.shortCode}, {t.year})</span>
-                </li>
-              ))}
-            </ul>
+            <div className="max-h-[400px] overflow-y-auto">
+              <ul className="space-y-1">
+                {publicDomainTranslations.map((t) => (
+                  <li key={t.id} className="text-sm flex items-center gap-2">
+                    <BookOpen size={16} className="text-primary" weight="duotone" />
+                    <span className="font-medium">{t.shortCode}</span>
+                    <span className="text-muted-foreground">- {t.name} ({t.year})</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </CardContent>
         </Card>
       </div>

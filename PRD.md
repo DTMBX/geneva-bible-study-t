@@ -16,11 +16,21 @@ The application integrates with the **Bolls Life Bible API** (https://bolls.life
 
 - **License**: Public Domain content
 - **No Attribution Required**: Fully permissive for non-commercial and commercial use
-- **Available Translations**: 
+- **Available Translations**: 16+ public domain translations including:
   - Geneva Bible (1560) - Public Domain
-  - King James Version (1611) - Public Domain  
-  - World English Bible - Public Domain
-  - And 30+ other translations
+  - King James Version (1611) - Public Domain
+  - World English Bible (2000) - Public Domain
+  - Young's Literal Translation (1862) - Public Domain
+  - American Standard Version (1901) - Public Domain
+  - Bible in Basic English (1949) - Public Domain
+  - Darby Translation (1890) - Public Domain
+  - Douay-Rheims Bible (1609) - Public Domain
+  - Webster's Bible (1833) - Public Domain
+  - American King James Version (1999) - Public Domain
+  - Lexham English Bible (2012) - Public Domain
+  - World Messianic Bible (2014) - Public Domain
+  - Plus Latin, Portuguese, and Russian translations
+- **Coverage**: Complete Old Testament (39 books) and New Testament (27 books) for all translations
 - **Features**:
   - Fetch individual verses
   - Fetch complete chapters
