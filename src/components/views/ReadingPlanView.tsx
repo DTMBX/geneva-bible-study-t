@@ -13,6 +13,7 @@ import { toast } from 'sonner'
 import CustomPlanBuilder from './CustomPlanBuilder'
 import NotificationSettingsPanel from './NotificationSettingsPanel'
 import ShareProgressDialog from '@/components/social/ShareProgressDialog'
+import { trackUserActivity, updateCurrentStreak } from '@/lib/community-utils'
 
 interface ReadingPlanViewProps {
   onNavigateToReader?: (bookId: string, chapter: number) => void
@@ -96,7 +97,7 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
     toast.success('Opening today\'s reading in Bible Reader')
   }
 
-  const markDayComplete = (day: number) => {
+  const markDayComplete = async (day: number) => {
     const wasCompleted = selectedUserPlan?.completedDays.includes(day) || false
     
     setActiveUserPlans(current => 
@@ -118,10 +119,28 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
     )
     
     if (!wasCompleted) {
+      const dayReading = selectedPlan?.days.find(d => d.day === day)
+      if (dayReading && dayReading.readings.length > 0) {
+        const firstReading = dayReading.readings[0]
+        await trackUserActivity('chapter-read', {
+          bookName: getBookDisplayName(firstReading.workId),
+          chapterNumber: firstReading.chapterNumber,
+          planName: selectedPlan?.name
+        }, 'friends')
+      }
+
+      await updateCurrentStreak()
+
       const newCompletedCount = (selectedUserPlan?.completedDays.length || 0) + 1
       const totalDays = selectedPlan?.duration || 0
       
       if (newCompletedCount === totalDays) {
+        await trackUserActivity('plan-completed', {
+          planName: selectedPlan?.name,
+          planId: selectedPlanId || '',
+          daysCompleted: totalDays
+        }, 'friends')
+
         setShareDialogData({
           type: 'plan-complete',
           title: 'Reading Plan Complete!',
@@ -142,6 +161,11 @@ export default function ReadingPlanView({ onNavigateToReader }: ReadingPlanViewP
         })
         setShareDialogOpen(true)
       } else if ([30, 50, 100].includes(newCompletedCount)) {
+        await trackUserActivity('milestone-achieved', {
+          planName: selectedPlan?.name,
+          daysCompleted: newCompletedCount
+        }, 'friends')
+
         setShareDialogData({
           type: 'milestone',
           title: `${newCompletedCount} Days Milestone!`,

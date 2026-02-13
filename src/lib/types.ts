@@ -283,3 +283,97 @@ export interface ShareSettings {
   shareToPublicFeed: boolean
   allowComments: boolean
 }
+
+export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected'
+
+export interface FriendRequest {
+  id: string
+  fromUserId: string
+  fromUserName: string
+  fromUserAvatar?: string
+  toUserId: string
+  status: FriendRequestStatus
+  createdAt: number
+  respondedAt?: number
+}
+
+export interface UserConnection {
+  userId: string
+  userName: string
+  userAvatar?: string
+  connectedAt: number
+  lastActivityAt: number
+  mutualFriends: number
+}
+
+export interface UserActivity {
+  id: string
+  userId: string
+  userName: string
+  userAvatar?: string
+  type: 'verse-shared' | 'milestone-achieved' | 'plan-completed' | 'streak-milestone' | 'chapter-read' | 'note-created'
+  timestamp: number
+  data: {
+    verseId?: string
+    bookName?: string
+    chapterNumber?: number
+    verseNumber?: number
+    planName?: string
+    streakDays?: number
+    notePreview?: string
+    [key: string]: any
+  }
+  visibility: 'public' | 'friends' | 'private'
+}
+
+export interface CommunityProfile {
+  userId: string
+  userName: string
+  userAvatar?: string
+  bio?: string
+  location?: string
+  denomination?: string
+  favoriteBooks: string[]
+  readingGoals: {
+    chaptersPerWeek?: number
+    currentStreak: number
+    longestStreak: number
+    totalChaptersRead: number
+    plansCompleted: number
+  }
+  privacy: {
+    profileVisible: boolean
+    showReadingProgress: boolean
+    showFriendsList: boolean
+    allowFriendRequests: boolean
+  }
+  createdAt: number
+  updatedAt: number
+}
+
+export interface ReadingJourney {
+  userId: string
+  currentBook?: string
+  currentChapter?: number
+  recentActivity: UserActivity[]
+  activeReadingPlans: {
+    planId: string
+    planName: string
+    progress: number
+    currentDay: number
+    totalDays: number
+  }[]
+  recentVerses: {
+    verseId: string
+    bookName: string
+    reference: string
+    timestamp: number
+  }[]
+  milestones: {
+    id: string
+    type: 'streak' | 'chapters' | 'plan-complete' | 'year-complete'
+    title: string
+    achievedAt: number
+    value: number
+  }[]
+}

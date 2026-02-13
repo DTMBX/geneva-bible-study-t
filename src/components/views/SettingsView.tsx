@@ -6,9 +6,11 @@ import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
-import { Gear, TextAa, Moon, DownloadSimple } from '@phosphor-icons/react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Gear, TextAa, Moon, DownloadSimple, Users } from '@phosphor-icons/react'
 import { translations } from '@/lib/data'
 import type { UserProfile } from '@/lib/types'
+import CommunityProfileSettings from '@/components/social/CommunityProfileSettings'
 
 interface SettingsViewProps {
   userProfile: UserProfile
@@ -42,7 +44,19 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
         </p>
       </div>
 
-      <div className="space-y-6">
+      <Tabs defaultValue="reading" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="reading" className="gap-2">
+            <TextAa size={16} weight="duotone" />
+            Reading
+          </TabsTrigger>
+          <TabsTrigger value="community" className="gap-2">
+            <Users size={16} weight="duotone" />
+            Community
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="reading" className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -278,7 +292,12 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
             </p>
           </CardContent>
         </Card>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="community">
+          <CommunityProfileSettings />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { Users, Heart, ChatCircle, ShareNetwork, Trophy, BookOpen, CalendarCheck } from '@phosphor-icons/react'
+import { Users, Heart, ChatCircle, ShareNetwork, Trophy, BookOpen, CalendarCheck, UserPlus, MagnifyingGlass, Path } from '@phosphor-icons/react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -11,14 +11,29 @@ import { Separator } from '@/components/ui/separator'
 import { Input } from '@/components/ui/input'
 import type { SharedVerse, SharedProgress } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
+import FriendsList from '@/components/social/FriendsList'
+import FindFriends from '@/components/social/FindFriends'
+import ReadingJourneyView from '@/components/social/ReadingJourneyView'
 
 export default function SocialView() {
   const [sharedVerses = []] = useKV<SharedVerse[]>('shared-verses', [])
   const [sharedProgress = []] = useKV<SharedProgress[]>('shared-progress', [])
   const [likedItems, setLikedItems] = useKV<string[]>('liked-items', [])
   const [commentText, setCommentText] = useState<Record<string, string>>({})
+  const [activeView, setActiveView] = useState<'feed' | 'friends' | 'find' | 'journey'>('feed')
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
 
   const allShares = [...sharedVerses, ...sharedProgress].sort((a, b) => b.createdAt - a.createdAt)
+
+  const handleViewJourney = (userId: string) => {
+    setSelectedUserId(userId)
+    setActiveView('journey')
+  }
+
+  const handleBackToFeed = () => {
+    setActiveView('feed')
+    setSelectedUserId(null)
+  }
 
   const handleLike = async (itemId: string) => {
     const user = await window.spark.user()
@@ -37,99 +52,139 @@ export default function SocialView() {
     return 'verseText' in item
   }
 
+  if (activeView === 'journey' && selectedUserId) {
+    return (
+      <div className="h-full bg-background">
+        <ReadingJourneyView userId={selectedUserId} onBack={handleBackToFeed} />
+      </div>
+    )
+  }
+
   return (
     <div className="h-full flex flex-col bg-background">
       <div className="border-b bg-card px-6 py-4">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold mb-1 flex items-center gap-2" style={{ fontFamily: 'var(--font-heading)' }}>
             <Users size={28} weight="duotone" className="text-primary" />
-            Social Feed
+            Community
           </h2>
           <p className="text-muted-foreground">
-            Share verses, celebrate milestones, and encourage one another
+            Connect with friends and share your Bible reading journey
           </p>
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="flex-1 flex flex-col">
+      <Tabs value={activeView} onValueChange={(value) => setActiveView(value as any)} className="flex-1 flex flex-col">
         <div className="border-b bg-card px-6 py-2">
-          <TabsList className="max-w-3xl mx-auto">
-            <TabsTrigger value="all">All Updates</TabsTrigger>
-            <TabsTrigger value="verses">Verses</TabsTrigger>
-            <TabsTrigger value="progress">Progress</TabsTrigger>
+          <TabsList className="max-w-4xl mx-auto">
+            <TabsTrigger value="feed" className="gap-2">
+              <ShareNetwork size={16} weight="duotone" />
+              Feed
+            </TabsTrigger>
+            <TabsTrigger value="friends" className="gap-2">
+              <Users size={16} weight="duotone" />
+              Friends
+            </TabsTrigger>
+            <TabsTrigger value="find" className="gap-2">
+              <MagnifyingGlass size={16} weight="duotone" />
+              Find Friends
+            </TabsTrigger>
           </TabsList>
         </div>
 
         <ScrollArea className="flex-1">
           <div className="p-6">
-            <div className="max-w-3xl mx-auto space-y-4">
-              <TabsContent value="all" className="mt-0">
-                {allShares.length === 0 ? (
-                  <Card className="p-12 text-center">
-                    <Users size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No shares yet</h3>
-                    <p className="text-muted-foreground mb-4">
-                      Share your favorite verses and reading progress to get started!
-                    </p>
-                  </Card>
-                ) : (
-                  allShares.map((item) => (
-                    <ShareCard
-                      key={item.id}
-                      item={item}
-                      isLiked={likedItems?.includes(item.id) || false}
-                      onLike={() => handleLike(item.id)}
-                      commentText={commentText[item.id] || ''}
-                      onCommentChange={(text) => setCommentText({ ...commentText, [item.id]: text })}
-                    />
-                  ))
-                )}
+            <div className="max-w-4xl mx-auto">
+              <TabsContent value="feed" className="mt-0 space-y-4">
+                <Tabs defaultValue="all" className="w-full">
+                  <TabsList className="w-full">
+                    <TabsTrigger value="all" className="flex-1">All Updates</TabsTrigger>
+                    <TabsTrigger value="verses" className="flex-1">Verses</TabsTrigger>
+                    <TabsTrigger value="progress" className="flex-1">Progress</TabsTrigger>
+                  </TabsList>
+
+                  <div className="mt-4">
+                    <TabsContent value="all" className="mt-0 space-y-4">
+                      {allShares.length === 0 ? (
+                        <Card className="p-12 text-center">
+                          <ShareNetwork size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold mb-2">No shares yet</h3>
+                          <p className="text-muted-foreground mb-4">
+                            Share your favorite verses and reading progress to get started!
+                          </p>
+                        </Card>
+                      ) : (
+                        allShares.map((item) => (
+                          <ShareCard
+                            key={item.id}
+                            item={item}
+                            isLiked={likedItems?.includes(item.id) || false}
+                            onLike={() => handleLike(item.id)}
+                            commentText={commentText[item.id] || ''}
+                            onCommentChange={(text) => setCommentText({ ...commentText, [item.id]: text })}
+                            onViewJourney={() => handleViewJourney(item.userId)}
+                          />
+                        ))
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="verses" className="mt-0 space-y-4">
+                      {sharedVerses.length === 0 ? (
+                        <Card className="p-12 text-center">
+                          <BookOpen size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold mb-2">No verses shared</h3>
+                          <p className="text-muted-foreground">
+                            Share inspiring verses from your reading
+                          </p>
+                        </Card>
+                      ) : (
+                        sharedVerses.map((verse) => (
+                          <ShareCard
+                            key={verse.id}
+                            item={verse}
+                            isLiked={likedItems?.includes(verse.id) || false}
+                            onLike={() => handleLike(verse.id)}
+                            commentText={commentText[verse.id] || ''}
+                            onCommentChange={(text) => setCommentText({ ...commentText, [verse.id]: text })}
+                            onViewJourney={() => handleViewJourney(verse.userId)}
+                          />
+                        ))
+                      )}
+                    </TabsContent>
+
+                    <TabsContent value="progress" className="mt-0 space-y-4">
+                      {sharedProgress.length === 0 ? (
+                        <Card className="p-12 text-center">
+                          <Trophy size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
+                          <h3 className="text-xl font-semibold mb-2">No progress shared</h3>
+                          <p className="text-muted-foreground">
+                            Complete reading plans and celebrate milestones
+                          </p>
+                        </Card>
+                      ) : (
+                        sharedProgress.map((progress) => (
+                          <ShareCard
+                            key={progress.id}
+                            item={progress}
+                            isLiked={likedItems?.includes(progress.id) || false}
+                            onLike={() => handleLike(progress.id)}
+                            commentText={commentText[progress.id] || ''}
+                            onCommentChange={(text) => setCommentText({ ...commentText, [progress.id]: text })}
+                            onViewJourney={() => handleViewJourney(progress.userId)}
+                          />
+                        ))
+                      )}
+                    </TabsContent>
+                  </div>
+                </Tabs>
               </TabsContent>
 
-              <TabsContent value="verses" className="mt-0">
-                {sharedVerses.length === 0 ? (
-                  <Card className="p-12 text-center">
-                    <BookOpen size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No verses shared</h3>
-                    <p className="text-muted-foreground">
-                      Share inspiring verses from your reading
-                    </p>
-                  </Card>
-                ) : (
-                  sharedVerses.map((verse) => (
-                    <ShareCard
-                      key={verse.id}
-                      item={verse}
-                      isLiked={likedItems?.includes(verse.id) || false}
-                      onLike={() => handleLike(verse.id)}
-                      commentText={commentText[verse.id] || ''}
-                      onCommentChange={(text) => setCommentText({ ...commentText, [verse.id]: text })}
-                    />
-                  ))
-                )}
+              <TabsContent value="friends" className="mt-0">
+                <FriendsList onViewJourney={handleViewJourney} />
               </TabsContent>
 
-              <TabsContent value="progress" className="mt-0">
-                {sharedProgress.length === 0 ? (
-                  <Card className="p-12 text-center">
-                    <Trophy size={64} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No progress shared</h3>
-                    <p className="text-muted-foreground">
-                      Complete reading plans and celebrate milestones
-                    </p>
-                  </Card>
-                ) : (
-                  sharedProgress.map((progress) => (
-                    <ShareCard
-                      key={progress.id}
-                      item={progress}
-                      isLiked={likedItems?.includes(progress.id) || false}
-                      onLike={() => handleLike(progress.id)}
-                      commentText={commentText[progress.id] || ''}
-                      onCommentChange={(text) => setCommentText({ ...commentText, [progress.id]: text })}
-                    />
-                  ))
-                )}
+              <TabsContent value="find" className="mt-0">
+                <FindFriends onViewJourney={handleViewJourney} />
               </TabsContent>
             </div>
           </div>
@@ -145,22 +200,27 @@ interface ShareCardProps {
   onLike: () => void
   commentText: string
   onCommentChange: (text: string) => void
+  onViewJourney: () => void
 }
 
-function ShareCard({ item, isLiked, onLike }: ShareCardProps) {
+function ShareCard({ item, isLiked, onLike, onViewJourney }: ShareCardProps) {
   const isVerse = 'verseText' in item
 
   return (
     <Card className="overflow-hidden hover:shadow-lg transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <Avatar>
-            <AvatarImage src={item.userAvatar} />
-            <AvatarFallback>{item.userName[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <button onClick={onViewJourney} className="hover:opacity-80 transition-opacity">
+            <Avatar>
+              <AvatarImage src={item.userAvatar} />
+              <AvatarFallback>{item.userName[0]?.toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </button>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <p className="font-semibold">{item.userName}</p>
+              <button onClick={onViewJourney} className="hover:underline">
+                <p className="font-semibold">{item.userName}</p>
+              </button>
               {isVerse ? (
                 <Badge variant="secondary" className="text-xs">
                   <BookOpen size={12} weight="duotone" className="mr-1" />
