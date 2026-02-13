@@ -27,7 +27,9 @@ import {
   SignOut,
   UserPlus,
   Bookmark,
-  BookOpen
+  BookOpen,
+  PushPin,
+  X
 } from '@phosphor-icons/react'
 import type { GroupDiscussion, GroupMessage } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
@@ -180,6 +182,27 @@ export default function GroupDiscussionThread({
     onBack?.()
   }
 
+  const handlePinMessage = (messageId: string) => {
+    if (!group) return
+
+    const isPinned = group.pinnedMessageIds.includes(messageId)
+
+    setGroups((currentGroups) =>
+      (currentGroups || []).map(g => {
+        if (g.id !== groupId) return g
+        
+        return {
+          ...g,
+          pinnedMessageIds: isPinned
+            ? g.pinnedMessageIds.filter(id => id !== messageId)
+            : [...g.pinnedMessageIds, messageId]
+        }
+      })
+    )
+
+    toast.success(isPinned ? 'Message unpinned' : 'Message pinned')
+  }
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -203,6 +226,11 @@ export default function GroupDiscussionThread({
   }
 
   const isAdmin = group.createdBy === currentUserId
+  const isModerator = group.members.find(m => m.userId === currentUserId)?.role === 'moderator'
+  const canPinMessages = isAdmin || isModerator
+
+  const pinnedMessages = messages.filter(msg => group.pinnedMessageIds.includes(msg.id))
+  const regularMessages = messages.filter(msg => !group.pinnedMessageIds.includes(msg.id))
 
   return (
     <div className="h-full flex flex-col bg-background">
@@ -266,7 +294,96 @@ export default function GroupDiscussionThread({
 
       <ScrollArea className="flex-1 p-4" ref={scrollAreaRef}>
         <div className="space-y-4 max-w-4xl mx-auto">
-          {messages.length === 0 ? (
+          {pinnedMessages.length > 0 && (
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-3 text-sm font-medium text-muted-foreground">
+                <PushPin size={16} weight="fill" />
+                <span>Pinned Messages</span>
+              </div>
+              <div className="space-y-3">
+                {pinnedMessages.map((message) => {
+                  const isOwnMessage = message.fromUserId === currentUserId
+
+                  return (
+                    <div
+                      key={message.id}
+                      className="relative bg-accent/30 border border-accent rounded-lg p-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8 flex-shrink-0">
+                          <AvatarFallback className="text-xs">
+                            {getInitials(message.fromUserName)}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-sm font-medium">{message.fromUserName}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistanceToNow(message.createdAt, { addSuffix: true })}
+                            </span>
+                            <PushPin size={14} weight="fill" className="text-accent ml-auto" />
+                          </div>
+
+                          {message.verseReference && (
+                            <div className="flex items-center gap-2 text-sm mb-2 pb-2 border-b border-border">
+                              <BookOpen size={16} weight="fill" />
+                              <span className="font-medium">
+                                {message.verseReference.bookName} {message.verseReference.chapterNumber}:
+                                {message.verseReference.verseNumber}
+                                {message.verseReference.verseEndNumber &&
+                                  `-${message.verseReference.verseEndNumber}`}
+                              </span>
+                            </div>
+                          )}
+
+                          <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+
+                          {Object.keys(message.reactions).length > 0 && (
+                            <div className="flex gap-1 mt-2 flex-wrap">
+                              {Object.entries(message.reactions).map(([key, userIds]) => {
+                                if (userIds.length === 0) return null
+                                const ReactionIcon = getReactionIcon(key)
+                                const hasReacted = userIds.includes(currentUserId)
+
+                                return (
+                                  <button
+                                    key={key}
+                                    onClick={() => toggleReaction(message.id, key)}
+                                    className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-colors ${
+                                      hasReacted
+                                        ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                                        : 'bg-muted hover:bg-muted/80'
+                                    }`}
+                                  >
+                                    <ReactionIcon size={14} weight="fill" />
+                                    <span>{userIds.length}</span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {canPinMessages && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 flex-shrink-0"
+                            onClick={() => handlePinMessage(message.id)}
+                          >
+                            <X size={16} weight="bold" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {regularMessages.length === 0 && pinnedMessages.length === 0 ? (
             <div className="text-center py-12">
               <UsersThree size={64} weight="duotone" className="text-muted-foreground mx-auto mb-3" />
               <p className="text-muted-foreground mb-2">No messages yet</p>
@@ -275,9 +392,10 @@ export default function GroupDiscussionThread({
               </p>
             </div>
           ) : (
-            messages.map((message, index) => {
+            regularMessages.map((message, index) => {
               const isOwnMessage = message.fromUserId === currentUserId
-              const showAvatar = index === 0 || messages[index - 1].fromUserId !== message.fromUserId
+              const showAvatar = index === 0 || regularMessages[index - 1].fromUserId !== message.fromUserId
+              const isPinned = group.pinnedMessageIds.includes(message.id)
 
               return (
                 <div
@@ -351,7 +469,7 @@ export default function GroupDiscussionThread({
                         </div>
                       )}
 
-                      <div className="absolute -right-2 top-0 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                      <div className={`absolute top-0 opacity-0 group-hover/message:opacity-100 transition-opacity flex gap-1 ${isOwnMessage ? 'left-0 -translate-x-full -ml-2' : 'right-0 translate-x-full mr-2'}`}>
                         <DropdownMenu
                           open={showReactionPicker === message.id}
                           onOpenChange={(open) => setShowReactionPicker(open ? message.id : null)}
@@ -373,6 +491,17 @@ export default function GroupDiscussionThread({
                             ))}
                           </DropdownMenuContent>
                         </DropdownMenu>
+
+                        {canPinMessages && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => handlePinMessage(message.id)}
+                          >
+                            <PushPin size={16} weight={isPinned ? 'fill' : 'regular'} />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </div>
