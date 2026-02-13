@@ -7,11 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck } from '@phosphor-icons/react'
+import { Gear, TextAa, Moon, DownloadSimple, Users, ShieldCheck, Bell } from '@phosphor-icons/react'
 import { translations } from '@/lib/data'
 import type { UserProfile } from '@/lib/types'
 import CommunityProfileSettings from '@/components/social/CommunityProfileSettings'
 import ModeratorTestPanel from '@/components/social/ModeratorTestPanel'
+import VerseOfDayNotifications from './VerseOfDayNotifications'
 
 interface SettingsViewProps {
   userProfile: UserProfile
@@ -50,6 +51,10 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
           <TabsTrigger value="reading" className="gap-2">
             <TextAa size={16} weight="duotone" />
             Reading
+          </TabsTrigger>
+          <TabsTrigger value="notifications" className="gap-2">
+            <Bell size={16} weight="duotone" />
+            Notifications
           </TabsTrigger>
           <TabsTrigger value="community" className="gap-2">
             <Users size={16} weight="duotone" />
@@ -297,6 +302,10 @@ export default function SettingsView({ userProfile: initialProfile }: SettingsVi
             </p>
           </CardContent>
         </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications" className="space-y-6">
+          <VerseOfDayNotifications />
         </TabsContent>
 
         <TabsContent value="community">
