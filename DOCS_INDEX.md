@@ -60,6 +60,18 @@ New to the project? Start here:
   - Breaking changes
   - Migration guides
 
+- **[LIGHTHOUSE_CI.md](./LIGHTHOUSE_CI.md)** - Performance testing guide
+  - Automated performance audits
+  - CI/CD integration
+  - Score interpretation
+  - Optimization recommendations
+
+- **[LIGHTHOUSE_QUICK_REF.md](./LIGHTHOUSE_QUICK_REF.md)** - Quick reference
+  - Common commands
+  - Score thresholds
+  - Troubleshooting guide
+  - Quick wins
+
 ### Deployment Documentation
 
 - **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Comprehensive deployment guide
@@ -85,6 +97,7 @@ New to the project? Start here:
 |------|---------------|----------|
 | Install and run locally | [README.md](./README.md) | Quick Start section |
 | Deploy to GitHub Pages | [DEPLOYMENT.md](./DEPLOYMENT.md) | GitHub Pages section |
+| Run performance tests | [LIGHTHOUSE_CI.md](./LIGHTHOUSE_CI.md) | Usage section |
 | Use Bible API | [BIBLE_API_INTEGRATION.md](./BIBLE_API_INTEGRATION.md) | Usage Examples section |
 | Add new feature | [CONTRIBUTING.md](./CONTRIBUTING.md) | Development Workflow section |
 | Check licenses | [THIRD_PARTY_LICENSES.md](./THIRD_PARTY_LICENSES.md) | Summary section |
@@ -102,6 +115,10 @@ npm run preview      # Preview production build
 # Quality
 npm run lint         # Run linter
 npm audit            # Check for vulnerabilities
+
+# Performance Testing
+lhci autorun         # Run Lighthouse CI locally
+npm run preview      # Required for Lighthouse tests
 
 # Deployment
 git push origin main # Trigger GitHub Actions deployment
@@ -130,7 +147,9 @@ git push origin main # Trigger GitHub Actions deployment
 │   └── main.tsx            # Entry point
 ├── .github/
 │   └── workflows/          # GitHub Actions
-│       └── deploy.yml      # Deployment workflow
+│       ├── deploy.yml      # Deployment workflow
+│       ├── lighthouse-ci.yml      # Performance testing (PR)
+│       └── lighthouse-full.yml    # Full audit (weekly)
 ├── public/                 # Static assets
 ├── Documentation files:
 │   ├── README.md           # Project overview
@@ -138,6 +157,8 @@ git push origin main # Trigger GitHub Actions deployment
 │   ├── BIBLE_API_INTEGRATION.md  # API docs
 │   ├── DEPLOYMENT.md       # Deployment guide
 │   ├── CONTRIBUTING.md     # Developer guide
+│   ├── LIGHTHOUSE_CI.md    # Performance testing
+│   ├── LIGHTHOUSE_QUICK_REF.md   # Quick reference
 │   ├── THIRD_PARTY_LICENSES.md   # License info
 │   ├── SECURITY_POLICY.md  # Security guidelines
 │   ├── CHANGELOG.md        # Version history
@@ -147,6 +168,9 @@ git push origin main # Trigger GitHub Actions deployment
 │   ├── tsconfig.json       # TypeScript config
 │   ├── vite.config.ts      # Vite config
 │   ├── tailwind.config.js  # Tailwind config
+│   ├── lighthouserc.json   # Lighthouse desktop config
+│   ├── lighthouserc.mobile.json  # Lighthouse mobile config
+│   ├── performance-budget.json   # Performance budgets
 │   └── .gitignore          # Git ignore rules
 └── LICENSE                 # MIT License
 
@@ -171,6 +195,8 @@ git push origin main # Trigger GitHub Actions deployment
 - Component structure → [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Pull requests → [CONTRIBUTING.md](./CONTRIBUTING.md)
 - TypeScript types → `src/lib/types.ts`
+- Performance testing → [LIGHTHOUSE_CI.md](./LIGHTHOUSE_CI.md)
+- Quick commands → [LIGHTHOUSE_QUICK_REF.md](./LIGHTHOUSE_QUICK_REF.md)
 
 **Deployment**
 - GitHub Pages → [DEPLOYMENT.md](./DEPLOYMENT.md)

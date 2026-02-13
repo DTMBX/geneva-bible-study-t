@@ -4,6 +4,7 @@ A scholarly, offline-capable Bible study application that positions the Geneva B
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/deploy.yml?branch=main)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions)
+[![Lighthouse CI](https://img.shields.io/github/actions/workflow/status/YOUR_USERNAME/YOUR_REPO/lighthouse-ci.yml?branch=main&label=lighthouse)](https://github.com/YOUR_USERNAME/YOUR_REPO/actions/workflows/lighthouse-ci.yml)
 [![GitHub Pages](https://img.shields.io/badge/deployed%20on-GitHub%20Pages-brightgreen)](https://YOUR_USERNAME.github.io/YOUR_REPO/)
 [![Node Version](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
@@ -170,6 +171,22 @@ npm run lint
 # Optimize dependencies
 npm run optimize
 ```
+
+## 📊 Performance Testing
+
+This project includes automated Lighthouse CI performance testing:
+
+- **Automated Audits:** Run on every pull request and push to main
+- **Mobile & Desktop:** Separate configurations for both form factors
+- **Weekly Reports:** Comprehensive performance reports generated automatically
+- **Performance Budgets:** Enforced thresholds for key metrics
+- **PR Comments:** Automatic performance feedback on pull requests
+
+See [LIGHTHOUSE_CI.md](./LIGHTHOUSE_CI.md) for detailed documentation on:
+- Running Lighthouse tests locally
+- Understanding performance scores
+- Optimization recommendations
+- CI/CD integration details
 
 ## 📁 Project Structure
 

@@ -32,3 +32,7 @@ pids
 .devcontainer/
 
 .spark-workbench-id
+
+# Lighthouse CI
+.lighthouseci/
+lhci-reports/
