@@ -155,7 +155,14 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Permission Details Available**: Tap "Role Permissions" in Group Info to see complete permission matrix for all roles
 - **Settings Affect Permissions**: "Anyone can post" setting restricts posting to Admins/Moderators when disabled; "Allow member invites" restricts invites to Admins/Moderators when disabled
 
-### 15. Curator/Admin Content Management
+### 15. Audio Bible Playback with Multiple Narrators
+- **Functionality**: Listen to Scripture read aloud with choice of multiple AI-powered narrators with different voices (male/female), accents (American/British), and reading styles, adjustable playback speed (0.5x-2.0x), volume control, auto-advance to next chapter, visual highlighting of currently playing verse, narrator preview before selection, and persistent audio preferences across sessions
+- **Purpose**: Enable hands-free Bible study for commuters, busy parents, visually impaired users, or anyone who prefers auditory learning, making Scripture accessible during activities like driving, cooking, or exercising, while providing personalized listening experiences through narrator choice
+- **Trigger**: Reader view → Tap Audio button in header; Narrator button to browse and preview voices; Play button in audio player controls
+- **Progression**: Reader opens → Tap "Audio" button → Audio player controls appear below header → Select preferred narrator (David, Sarah, James, Elizabeth) with preview capability → Adjust playback speed (0.5x-2.0x) and volume → Tap Play → First verse begins speaking with narrator's voice → Currently playing verse highlights with animated border → Playback continues verse-by-verse automatically → Pause/Resume at any time → Skip to specific verse by tapping verse number → Playback speed changes apply immediately → Stop ends playback and resets position → Change narrator mid-playback to hear different voice → Navigate to new chapter and audio stops → Audio preferences (narrator, speed, volume) save automatically → Return to Reader later with same narrator and settings ready
+- **Success criteria**: Multiple narrator voices available (at least 4 distinct voices); preview functionality works for narrator selection; playback begins within 500ms of pressing play; verse highlighting updates in sync with audio; playback controls (play/pause/stop) respond instantly; speed adjustment from 0.5x to 2.0x works smoothly; volume control functions properly; narrator selection dialog shows voice characteristics (gender, accent, quality); preferences persist across sessions; audio stops cleanly when changing chapters; Web Speech Synthesis API provides natural-sounding voices across browsers
+
+### 16. Curator/Admin Content Management
 - **Functionality**: Role-based tools for curators to edit metadata, alignment annotations, timeline events, and book introductions with versioned audit logs and reversible changes
 - **Purpose**: Maintain content quality and accuracy through community curation while ensuring all edits are transparent and reversible
 - **Trigger**: Admin users see "Edit" buttons throughout app; or Admin → Content Management dashboard
@@ -221,6 +228,9 @@ Animations should feel like carefully turning pages in a valuable historical vol
 - **Note save**: Brief 150ms scale pulse (1.0 → 1.05 → 1.0) with accent border flash to confirm successful save
 - **Bookmark add**: 300ms bookmark icon slides in from right with gentle bounce, suggesting physical bookmark placement
 - **Navigation drawer**: 280ms ease-out slide with content fade, maintaining reading focus while revealing structure
+- **Audio verse highlight**: Continuous subtle pulse animation (opacity 0.8 → 1.0) on currently playing verse with primary color border, creating focus without distraction
+- **Audio player reveal**: 250ms slide-down with ease-out when toggling audio controls, smooth height transition
+- **Narrator switch**: Brief 100ms fade when changing narrators to indicate voice transition
 
 ## Component Selection
 
@@ -244,13 +254,17 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Breadcrumb (for navigation path: Library > Old Testament > Law > Genesis > Chapter 1)
   - Progress (for reading plan completion percentage)
   - Calendar grid (custom component for reading plan calendar view with completion status)
+  - Slider (for font size, line spacing, audio playback speed, audio volume)
+  - Card (audio player controls container with narrator info and playback controls)
 
 - **Customizations**:
-  - Custom `VerseText` component with selectable verses, inline verse numbers, and tap targets for annotations
+  - Custom `VerseText` component with selectable verses, inline verse numbers, tap targets for annotations, and animated highlighting for currently playing audio verse
   - Custom `ComparisonPanel` component managing synchronized scroll across multiple translation columns with diff highlighting
   - Custom `TimelineVisualization` component using D3 for interactive historical timeline with zoom, pan, and era filtering
   - Custom `PassageNavigator` component providing book/chapter/verse picker with autocomplete and recent history
   - Custom `AlignmentDiffView` component showing word-level and phrase-level differences with color coding and explanation tooltips
+  - Custom `AudioPlayerControls` component with play/pause/stop buttons, narrator selector, playback speed slider, volume control, and verse progress indicator
+  - Custom `NarratorSelectionDialog` component showing narrator profiles with voice characteristics (gender, accent), preview playback functionality, and narrator switching
 
 - **States**:
   - Buttons: Default (primary burgundy with white text), Hover (slightly lighter burgundy with subtle lift shadow), Active (pressed inset effect), Disabled (muted with 50% opacity), Loading (with subtle spinner)
@@ -299,6 +313,10 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Users (Social community feed)
   - Trophy (Reading milestones)
   - Export (Share progress)
+  - SpeakerHigh (Audio Bible playback)
+  - Play/Pause/Stop (Audio controls)
+  - User/UserCircle (Narrator selection)
+  - CaretUp/CaretDown (Volume/speed adjustment)
 
 - **Spacing**: 
   - Consistent 4px base unit (Tailwind's default)

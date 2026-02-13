@@ -466,3 +466,36 @@ export interface GroupDiscussion {
     moderationEnabled: boolean
   }
 }
+
+export type NarratorGender = 'male' | 'female'
+
+export type NarratorAccent = 'american' | 'british' | 'neutral'
+
+export interface AudioNarrator {
+  id: string
+  name: string
+  description: string
+  gender: NarratorGender
+  accent: NarratorAccent
+  voice: SpeechSynthesisVoice | null
+  previewText: string
+  quality: 'standard' | 'premium'
+}
+
+export interface AudioPlaybackState {
+  isPlaying: boolean
+  isPaused: boolean
+  currentVerseNumber: number
+  playbackRate: number
+  volume: number
+  narratorId: string
+  autoAdvanceChapter: boolean
+}
+
+export interface AudioPreferences {
+  defaultNarratorId: string
+  playbackRate: number
+  volume: number
+  autoAdvanceChapter: boolean
+  highlightCurrentVerse: boolean
+}

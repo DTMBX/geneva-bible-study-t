@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork, PaperPlaneTilt } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork, PaperPlaneTilt, SpeakerHigh, User } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -11,6 +11,9 @@ import type { UserProfile, VerseUnit, PassageReference } from '@/lib/types'
 import { generateChapterVerses } from '@/lib/verse-generator'
 import ShareDialog from '@/components/social/ShareDialog'
 import ShareVerseWithFriendsDialog from '@/components/reader/ShareVerseWithFriendsDialog'
+import AudioPlayerControls from '@/components/reader/AudioPlayerControls'
+import NarratorSelectionDialog from '@/components/reader/NarratorSelectionDialog'
+import { useAudioBible } from '@/hooks/use-audio-bible'
 
 interface ReaderViewProps {
   userProfile: UserProfile
@@ -22,6 +25,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   const [selectedVerses, setSelectedVerses] = useState<number[]>([])
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
   const [shareFriendsDialogOpen, setShareFriendsDialogOpen] = useState(false)
+  const [narratorDialogOpen, setNarratorDialogOpen] = useState(false)
+  const [showAudioPlayer, setShowAudioPlayer] = useState(false)
   
   const [lastReadPosition, setLastReadPosition] = useKV<PassageReference>('last-read-position', {
     workId: 'gen',
@@ -31,6 +36,23 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
 
   const currentBook = bibleBooks.find(b => b.id === currentBookId)
   const translationId = userProfile.preferences.defaultTranslation
+
+  const verses = generateChapterVerses(currentBookId, currentChapter, translationId)
+  
+  const {
+    playbackState,
+    currentNarrator,
+    narrators,
+    audioPreferences,
+    play,
+    pause,
+    resume,
+    stop,
+    skipToVerse,
+    setNarrator,
+    setPlaybackRate,
+    setVolume
+  } = useAudioBible(verses)
 
   useEffect(() => {
     if (lastReadPosition) {
@@ -61,9 +83,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     }))
   }, [currentBookId, currentChapter, setLastReadPosition])
 
-  const verses = generateChapterVerses(currentBookId, currentChapter, translationId)
-
   const handlePrevChapter = () => {
+    stop()
     if (currentChapter > 1) {
       setCurrentChapter(currentChapter - 1)
       setSelectedVerses([])
@@ -79,6 +100,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   }
 
   const handleNextChapter = () => {
+    stop()
     if (currentBook && currentChapter < currentBook.chaptersCount) {
       setCurrentChapter(currentChapter + 1)
       setSelectedVerses([])
@@ -103,12 +125,14 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   }
 
   const handleBookChange = (bookId: string) => {
+    stop()
     setCurrentBookId(bookId)
     setCurrentChapter(1)
     setSelectedVerses([])
   }
 
   const handleChapterChange = (chapter: string) => {
+    stop()
     setCurrentChapter(parseInt(chapter))
     setSelectedVerses([])
   }
@@ -142,6 +166,13 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         verseEndNumber={selectedVerses.length > 1 ? Math.max(...selectedVerses) : undefined}
         verseText={getSelectedVerseText()}
         translation={translationId}
+      />
+      <NarratorSelectionDialog
+        open={narratorDialogOpen}
+        onOpenChange={setNarratorDialogOpen}
+        narrators={narrators}
+        currentNarratorId={playbackState.narratorId}
+        onSelectNarrator={setNarrator}
       />
       <div className="border-b border-border bg-card px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
@@ -177,6 +208,24 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button 
+            variant={showAudioPlayer ? "default" : "outline"} 
+            size="sm" 
+            onClick={() => setShowAudioPlayer(!showAudioPlayer)}
+            className="gap-2"
+          >
+            <SpeakerHigh size={18} weight="duotone" />
+            <span className="hidden sm:inline">Audio</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setNarratorDialogOpen(true)}
+            className="gap-2 hidden sm:flex"
+          >
+            <User size={18} weight="duotone" />
+            <span>Narrator</span>
+          </Button>
           {selectedVerses.length > 0 && (
             <>
               <Button 
@@ -202,6 +251,24 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         </div>
       </div>
 
+      {showAudioPlayer && (
+        <div className="border-b border-border px-4 py-3 bg-background">
+          <AudioPlayerControls
+            playbackState={playbackState}
+            currentNarrator={currentNarrator}
+            narrators={narrators}
+            onPlay={() => play()}
+            onPause={pause}
+            onResume={resume}
+            onStop={stop}
+            onNarratorChange={setNarrator}
+            onPlaybackRateChange={setPlaybackRate}
+            onVolumeChange={setVolume}
+            totalVerses={verses.length}
+          />
+        </div>
+      )}
+
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="max-w-3xl mx-auto px-6 py-8">
@@ -223,6 +290,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
                     group cursor-pointer rounded-md px-3 py-2 transition-colors relative
                     ${selectedVerses.includes(verse.verseNumber) 
                       ? 'bg-accent/20 border-l-4 border-l-accent' 
+                      : playbackState.isPlaying && playbackState.currentVerseNumber === verse.verseNumber && audioPreferences?.highlightCurrentVerse
+                      ? 'bg-primary/10 border-l-4 border-l-primary animate-pulse'
                       : 'hover:bg-muted/50'
                     }
                   `}
