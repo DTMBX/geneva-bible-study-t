@@ -103,7 +103,14 @@ The API integration is implemented in `/src/lib/bibleApi.ts` with React hooks in
 - **Progression**: Reader view → Tap settings icon → Adjust font size slider → Change font family → Toggle night mode → Adjust line spacing → Preview changes live → Close settings → Continue reading with new settings → Settings persist
 - **Success criteria**: All settings apply instantly; night mode is WCAG AA compliant; font size range is 12-24pt; settings sync across devices
 
-### 10. Curator/Admin Content Management
+### 10. Reading Plans with Daily Chapters
+- **Functionality**: Structured Bible reading plans with daily chapter assignments, progress tracking, calendar view, streak monitoring, and multiple plan options (chronological, canonical, thematic, devotional)
+- **Purpose**: Build consistent Bible reading habits through guided, manageable daily reading assignments that help users systematically engage with Scripture
+- **Trigger**: Reading Plans tab; or from Home, tap "Start a Reading Plan" card
+- **Progression**: Plans view opens → Browse available plans (One Year Canonical, 90 Days NT, Chronological, Gospels, Psalms & Proverbs, Pauline Epistles) → Tap Start Plan → Plan dashboard shows today's reading, progress percentage, days elapsed, and streak → Read assigned chapters → Mark day complete → Track progress via list or calendar view → Pause/resume as needed → Reset if starting over
+- **Success criteria**: Users can start multiple plans; daily readings are clearly displayed; progress persists across sessions; completion is tracked; calendar view shows at-a-glance progress; plans cover major reading approaches
+
+### 11. Curator/Admin Content Management
 - **Functionality**: Role-based tools for curators to edit metadata, alignment annotations, timeline events, and book introductions with versioned audit logs and reversible changes
 - **Purpose**: Maintain content quality and accuracy through community curation while ensuring all edits are transparent and reversible
 - **Trigger**: Admin users see "Edit" buttons throughout app; or Admin → Content Management dashboard
@@ -173,16 +180,16 @@ Animations should feel like carefully turning pages in a valuable historical vol
 ## Component Selection
 
 - **Components**: 
-  - Tabs (for main navigation bottom bar and Compare view translation selector)
-  - Card (for book displays in Library, translation cards in Catalog, timeline event cards)
-  - ScrollArea (for long scripture passages, comparison columns, timeline)
+  - Tabs (for main navigation bottom bar and Compare view translation selector, Reading Plans tab)
+  - Card (for book displays in Library, translation cards in Catalog, timeline event cards, reading plan cards, daily reading display)
+  - ScrollArea (for long scripture passages, comparison columns, timeline, reading plan day list)
   - Dialog (for book introductions, translation metadata details, note editing)
   - Sheet (for mobile navigation drawer, quick settings panel)
-  - Button (primary for main actions like "Compare", secondary for metadata views, ghost for verse actions)
+  - Button (primary for main actions like "Compare" and "Start Plan", secondary for metadata views, ghost for verse actions)
   - Input + Label (for search queries, note editing, passage lookup)
   - Select (for translation picker, canon tradition filter, timeline era selector)
-  - Separator (between books in Library, between timeline sections)
-  - Badge (for canon status, confidence labels, offline availability indicators)
+  - Separator (between books in Library, between timeline sections, between plan sections)
+  - Badge (for canon status, confidence labels, offline availability indicators, plan categories, plan status)
   - Tooltip (for verse number hover info, icon explanations, abbreviated metadata)
   - Accordion (for book introduction expand/collapse, advanced search filters, settings categories)
   - Toggle (for night mode, red-letter text, verse number visibility)
@@ -190,6 +197,8 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Popover (for verse context menu with quick actions: note/highlight/compare/bookmark)
   - DropdownMenu (for passage jump navigation, sort options, filter menus)
   - Breadcrumb (for navigation path: Library > Old Testament > Law > Genesis > Chapter 1)
+  - Progress (for reading plan completion percentage)
+  - Calendar grid (custom component for reading plan calendar view with completion status)
 
 - **Customizations**:
   - Custom `VerseText` component with selectable verses, inline verse numbers, and tap targets for annotations
@@ -225,6 +234,12 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - ArrowsOutSimple (Expand comparison)
   - Funnel (Search filters)
   - Tag (Note tags)
+  - CalendarCheck (Reading Plans)
+  - Play/Pause (Start/pause reading plans)
+  - CheckCircle/Circle (Plan day completion status)
+  - ArrowCounterClockwise (Reset plan)
+  - CalendarBlank (Plan start date)
+  - ListChecks (Progress tracking)
 
 - **Spacing**: 
   - Consistent 4px base unit (Tailwind's default)
@@ -236,7 +251,7 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Navigation bar: 64px height on mobile for thumb-friendly bottom tabs, 240px width sidebar on desktop
 
 - **Mobile**:
-  - Bottom tab bar (64px height) with 5 main tabs: Home, Library, Compare, Search, Timeline
+  - Bottom tab bar (64px height) with 7 main tabs: API Demo, Home, Library, Reading Plans, Compare, Search, Timeline
   - Collapsible settings panel slides up from bottom as Sheet
   - Reader uses full viewport with hidden controls (tap to reveal header/footer)
   - Compare view stacks translations vertically with sticky translation labels
@@ -245,5 +260,7 @@ Animations should feel like carefully turning pages in a valuable historical vol
   - Search filters collapse into a Drawer accessed via filter icon
   - Passage navigator uses full-screen modal with large tap targets for book/chapter selection
   - Typography settings accessible via quick-access button in Reader header (always visible)
-  - Desktop: Left sidebar navigation (240px) with persistent access to all sections, main content area uses max-width 1200px with generous margins
+  - Reading Plans show daily readings in stacked cards with large completion buttons
+  - Calendar view uses 7-column grid with touch-friendly day cells
+  - Desktop: Left sidebar navigation (240px) with persistent access to all sections including Reading Plans, main content area uses max-width 1200px with generous margins
 

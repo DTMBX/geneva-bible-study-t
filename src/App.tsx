@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code } from '@phosphor-icons/react'
+import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useIsMobile } from '@/hooks/use-mobile'
 import HomeView from '@/components/views/HomeView'
@@ -9,6 +9,7 @@ import CompareView from '@/components/views/CompareView'
 import SearchView from '@/components/views/SearchView'
 import TimelineView from '@/components/views/TimelineView'
 import SettingsView from '@/components/views/SettingsView'
+import ReadingPlanView from '@/components/views/ReadingPlanView'
 import ReaderView from '@/components/reader/ReaderView'
 import BibleApiDemo from '@/components/BibleApiDemo'
 import type { UserProfile } from '@/lib/types'
@@ -83,7 +84,7 @@ function App() {
                 </TabsContent>
               </div>
 
-              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-6 bg-card">
+              <TabsList className="w-full h-16 rounded-none border-t grid grid-cols-7 bg-card">
                 <TabsTrigger value="api-demo" className="flex-col gap-1 data-[state=active]:text-primary">
                   <Code size={24} weight="duotone" />
                   <span className="text-xs">API</span>
@@ -95,6 +96,10 @@ function App() {
                 <TabsTrigger value="library" className="flex-col gap-1 data-[state=active]:text-primary">
                   <Books size={24} weight="duotone" />
                   <span className="text-xs">Library</span>
+                </TabsTrigger>
+                <TabsTrigger value="reading-plan" className="flex-col gap-1 data-[state=active]:text-primary">
+                  <CalendarCheck size={24} weight="duotone" />
+                  <span className="text-xs">Plans</span>
                 </TabsTrigger>
                 <TabsTrigger value="compare" className="flex-col gap-1 data-[state=active]:text-primary">
                   <Columns size={24} weight="duotone" />
@@ -141,6 +146,10 @@ function App() {
                   <Clock size={24} weight="duotone" />
                   <span>Timeline</span>
                 </TabsTrigger>
+                <TabsTrigger value="reading-plan" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                  <CalendarCheck size={24} weight="duotone" />
+                  <span>Reading Plans</span>
+                </TabsTrigger>
                 <div className="flex-1" />
                 <TabsTrigger value="settings" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                   <Gear size={24} weight="duotone" />
@@ -169,6 +178,9 @@ function App() {
                 </TabsContent>
                 <TabsContent value="timeline" className="mt-0 h-full">
                   <TimelineView />
+                </TabsContent>
+                <TabsContent value="reading-plan" className="mt-0 h-full">
+                  <ReadingPlanView />
                 </TabsContent>
                 <TabsContent value="settings" className="mt-0 h-full">
                   <SettingsView userProfile={userProfile} />

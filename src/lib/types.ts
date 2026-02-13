@@ -183,3 +183,30 @@ export interface ComparisonSet {
   translationIds: string[]
   createdAt: number
 }
+
+export interface ReadingPlanDay {
+  day: number
+  readings: PassageReference[]
+  completed?: boolean
+  completedAt?: number
+}
+
+export interface ReadingPlan {
+  id: string
+  name: string
+  description: string
+  duration: number
+  category: 'chronological' | 'canonical' | 'thematic' | 'devotional' | 'custom'
+  days: ReadingPlanDay[]
+}
+
+export interface UserReadingPlan {
+  id: string
+  userId: string
+  planId: string
+  startDate: number
+  currentDay: number
+  completedDays: number[]
+  paused: boolean
+  notes: Record<number, string>
+}
