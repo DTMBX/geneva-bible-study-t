@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, Code, CalendarCheck, Users } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Badge } from '@/components/ui/badge'
 import { useIsMobile } from '@/hooks/use-mobile'
 import HomeView from '@/components/views/HomeView'
 import LibraryView from '@/components/views/LibraryView'
@@ -13,7 +14,7 @@ import ReadingPlanView from '@/components/views/ReadingPlanView'
 import SocialView from '@/components/views/SocialView'
 import ReaderView from '@/components/reader/ReaderView'
 import BibleApiDemo from '@/components/BibleApiDemo'
-import type { UserProfile } from '@/lib/types'
+import type { UserProfile, FriendRequest } from '@/lib/types'
 
 function App() {
   const isMobile = useIsMobile()
@@ -34,6 +35,9 @@ function App() {
       verseNumbersVisible: true
     }
   })
+
+  const [friendRequests = []] = useKV<FriendRequest[]>('friend-requests', [])
+  const pendingRequestCount = friendRequests.filter(req => req.status === 'pending').length
 
   const handleNavigateToReader = (bookId: string, chapter: number) => {
     setActiveTab('reader')
@@ -130,9 +134,14 @@ function App() {
                   <Clock size={24} weight="duotone" />
                   <span className="text-xs">Timeline</span>
                 </TabsTrigger>
-                <TabsTrigger value="social" className="flex-col gap-1 data-[state=active]:text-primary">
+                <TabsTrigger value="social" className="flex-col gap-1 data-[state=active]:text-primary relative">
                   <Users size={24} weight="duotone" />
                   <span className="text-xs">Social</span>
+                  {pendingRequestCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive">
+                      {pendingRequestCount}
+                    </Badge>
+                  )}
                 </TabsTrigger>
               </TabsList>
             </>
@@ -171,9 +180,14 @@ function App() {
                   <CalendarCheck size={24} weight="duotone" />
                   <span>Reading Plans</span>
                 </TabsTrigger>
-                <TabsTrigger value="social" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+                <TabsTrigger value="social" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground relative">
                   <Users size={24} weight="duotone" />
                   <span>Social</span>
+                  {pendingRequestCount > 0 && (
+                    <Badge className="ml-auto h-6 w-6 flex items-center justify-center p-0 text-xs bg-destructive">
+                      {pendingRequestCount}
+                    </Badge>
+                  )}
                 </TabsTrigger>
                 <div className="flex-1" />
                 <TabsTrigger value="settings" className="justify-start gap-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">

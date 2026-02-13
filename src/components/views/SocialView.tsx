@@ -14,6 +14,8 @@ import { formatDistanceToNow } from 'date-fns'
 import FriendsList from '@/components/social/FriendsList'
 import FindFriends from '@/components/social/FindFriends'
 import ReadingJourneyView from '@/components/social/ReadingJourneyView'
+import FriendsLeaderboard from '@/components/social/FriendsLeaderboard'
+import { seedDemoFriendRequests, seedDemoFriends } from '@/lib/friend-seeding'
 
 export default function SocialView() {
   const [sharedVerses = []] = useKV<SharedVerse[]>('shared-verses', [])
@@ -22,6 +24,13 @@ export default function SocialView() {
   const [commentText, setCommentText] = useState<Record<string, string>>({})
   const [activeView, setActiveView] = useState<'feed' | 'friends' | 'find' | 'journey'>('feed')
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
+
+  if (!initialized) {
+    seedDemoFriendRequests()
+    seedDemoFriends()
+    setInitialized(true)
+  }
 
   const allShares = [...sharedVerses, ...sharedProgress].sort((a, b) => b.createdAt - a.createdAt)
 
@@ -180,7 +189,10 @@ export default function SocialView() {
               </TabsContent>
 
               <TabsContent value="friends" className="mt-0">
-                <FriendsList onViewJourney={handleViewJourney} />
+                <div className="space-y-6">
+                  <FriendsLeaderboard onViewJourney={handleViewJourney} />
+                  <FriendsList onViewJourney={handleViewJourney} />
+                </div>
               </TabsContent>
 
               <TabsContent value="find" className="mt-0">
