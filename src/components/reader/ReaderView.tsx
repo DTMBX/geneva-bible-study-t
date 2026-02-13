@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
-import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork } from '@phosphor-icons/react'
+import { CaretLeft, CaretRight, BookOpen, BookmarkSimple, NotePencil, Gear, ListNumbers, ShareNetwork, PaperPlaneTilt } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -10,6 +10,7 @@ import { bibleBooks } from '@/lib/data'
 import type { UserProfile, VerseUnit, PassageReference } from '@/lib/types'
 import { generateChapterVerses } from '@/lib/verse-generator'
 import ShareDialog from '@/components/social/ShareDialog'
+import ShareVerseWithFriendsDialog from '@/components/reader/ShareVerseWithFriendsDialog'
 
 interface ReaderViewProps {
   userProfile: UserProfile
@@ -20,6 +21,7 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   const [currentChapter, setCurrentChapter] = useState(1)
   const [selectedVerses, setSelectedVerses] = useState<number[]>([])
   const [shareDialogOpen, setShareDialogOpen] = useState(false)
+  const [shareFriendsDialogOpen, setShareFriendsDialogOpen] = useState(false)
   
   const [lastReadPosition, setLastReadPosition] = useKV<PassageReference>('last-read-position', {
     workId: 'gen',
@@ -131,6 +133,16 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         verseText={getSelectedVerseText()}
         translation={translationId}
       />
+      <ShareVerseWithFriendsDialog
+        open={shareFriendsDialogOpen}
+        onOpenChange={setShareFriendsDialogOpen}
+        bookName={currentBook?.title || ''}
+        chapterNumber={currentChapter}
+        verseNumber={selectedVerses.length > 0 ? Math.min(...selectedVerses) : 1}
+        verseEndNumber={selectedVerses.length > 1 ? Math.max(...selectedVerses) : undefined}
+        verseText={getSelectedVerseText()}
+        translation={translationId}
+      />
       <div className="border-b border-border bg-card px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
           <Select value={currentBookId} onValueChange={handleBookChange}>
@@ -167,6 +179,15 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         <div className="flex items-center gap-2">
           {selectedVerses.length > 0 && (
             <>
+              <Button 
+                variant="default" 
+                size="sm" 
+                onClick={() => setShareFriendsDialogOpen(true)}
+                className="gap-2"
+              >
+                <PaperPlaneTilt size={18} weight="duotone" />
+                <span className="hidden sm:inline">Message Friend</span>
+              </Button>
               <Button variant="ghost" size="sm" onClick={() => setShareDialogOpen(true)}>
                 <ShareNetwork size={18} weight="duotone" />
               </Button>
@@ -198,9 +219,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
               {verses.map((verse) => (
                 <div
                   key={verse.id}
-                  onClick={() => handleVerseClick(verse.verseNumber)}
                   className={`
-                    group cursor-pointer rounded-md px-3 py-2 transition-colors
+                    group cursor-pointer rounded-md px-3 py-2 transition-colors relative
                     ${selectedVerses.includes(verse.verseNumber) 
                       ? 'bg-accent/20 border-l-4 border-l-accent' 
                       : 'hover:bg-muted/50'
@@ -209,12 +229,14 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
                 >
                   <div className="flex gap-3">
                     <span 
+                      onClick={() => handleVerseClick(verse.verseNumber)}
                       className="text-xs text-muted-foreground font-mono mt-1 select-none opacity-50 group-hover:opacity-100 transition-opacity"
                       style={{ fontFamily: 'var(--font-mono)' }}
                     >
                       {verse.verseNumber}
                     </span>
                     <p 
+                      onClick={() => handleVerseClick(verse.verseNumber)}
                       className="flex-1 leading-relaxed text-foreground"
                       style={{ 
                         fontFamily: 'var(--font-body)',
@@ -224,6 +246,20 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
                     >
                       {verse.text}
                     </p>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-start gap-1 mt-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setSelectedVerses([verse.verseNumber])
+                          setShareFriendsDialogOpen(true)
+                        }}
+                      >
+                        <PaperPlaneTilt size={16} weight="duotone" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
