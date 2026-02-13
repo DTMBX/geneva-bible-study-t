@@ -531,3 +531,22 @@ export interface TranslationPreset {
   createdAt: number
   isDefault?: boolean
 }
+
+export interface AudioBookmark {
+  id: string
+  userId: string
+  bookId: string
+  bookName: string
+  chapterNumber: number
+  verseNumber: number
+  verseText: string
+  translation: string
+  narratorId: string
+  narratorName: string
+  playbackRate: number
+  note?: string
+  tags?: string[]
+  createdAt: number
+  lastPlayedAt?: number
+  playCount: number
+}

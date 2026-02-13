@@ -1,4 +1,4 @@
-import { Play, Pause, Stop, SpeakerHigh, CaretRight, CaretLeft, Moon, Timer, ListPlus } from '@phosphor-icons/react'
+import { Play, Pause, Stop, SpeakerHigh, CaretRight, CaretLeft, Moon, Timer, ListPlus, BookmarkSimple } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Slider } from '@/components/ui/slider'
@@ -23,6 +23,8 @@ interface AudioPlayerControlsProps {
   onVolumeChange: (volume: number) => void
   onSleepTimerSet: (minutes: number | null) => void
   onPlaylistOpen?: () => void
+  onBookmarkOpen?: () => void
+  onAddBookmark?: () => void
   totalVerses: number
 }
 
@@ -40,6 +42,8 @@ export default function AudioPlayerControls({
   onVolumeChange,
   onSleepTimerSet,
   onPlaylistOpen,
+  onBookmarkOpen,
+  onAddBookmark,
   totalVerses
 }: AudioPlayerControlsProps) {
   const [timeRemaining, setTimeRemaining] = useState<string>('')
@@ -180,6 +184,29 @@ export default function AudioPlayerControls({
               title="Playlists"
             >
               <ListPlus size={20} weight="duotone" />
+            </Button>
+          )}
+
+          {onAddBookmark && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onAddBookmark}
+              title="Bookmark Current Moment"
+              disabled={!playbackState.isPlaying && !playbackState.isPaused}
+            >
+              <BookmarkSimple size={20} weight="duotone" />
+            </Button>
+          )}
+
+          {onBookmarkOpen && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={onBookmarkOpen}
+              title="View Bookmarks"
+            >
+              <BookmarkSimple size={20} weight="fill" />
             </Button>
           )}
 

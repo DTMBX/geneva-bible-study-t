@@ -7,14 +7,16 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
 import { bibleBooks } from '@/lib/data'
-import type { UserProfile, VerseUnit, PassageReference, AudioPlaylist } from '@/lib/types'
+import type { UserProfile, VerseUnit, PassageReference, AudioPlaylist, AudioBookmark } from '@/lib/types'
 import { generateChapterVerses } from '@/lib/verse-generator'
 import ShareDialog from '@/components/social/ShareDialog'
 import ShareVerseWithFriendsDialog from '@/components/reader/ShareVerseWithFriendsDialog'
 import AudioPlayerControls from '@/components/reader/AudioPlayerControls'
 import NarratorSelectionDialog from '@/components/reader/NarratorSelectionDialog'
 import PlaylistDialog from '@/components/reader/PlaylistDialog'
+import AudioBookmarksDialog from '@/components/reader/AudioBookmarksDialog'
 import { useAudioBible } from '@/hooks/use-audio-bible'
+import { toast } from 'sonner'
 
 interface ReaderViewProps {
   userProfile: UserProfile
@@ -28,12 +30,23 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
   const [shareFriendsDialogOpen, setShareFriendsDialogOpen] = useState(false)
   const [narratorDialogOpen, setNarratorDialogOpen] = useState(false)
   const [playlistDialogOpen, setPlaylistDialogOpen] = useState(false)
+  const [bookmarksDialogOpen, setBookmarksDialogOpen] = useState(false)
   const [showAudioPlayer, setShowAudioPlayer] = useState(false)
+  const [currentUserId, setCurrentUserId] = useState<string>('')
+  const [bookmarks, setBookmarks] = useKV<AudioBookmark[]>('audio-bookmarks', [])
   
   const [lastReadPosition, setLastReadPosition] = useKV<PassageReference>('last-read-position', {
     workId: 'gen',
     chapterNumber: 1,
     verseNumber: 1
+  })
+
+  useState(() => {
+    const fetchUser = async () => {
+      const user = await window.spark.user()
+      setCurrentUserId(user?.id?.toString() || 'anonymous')
+    }
+    fetchUser()
   })
 
   const currentBook = bibleBooks.find(b => b.id === currentBookId)
@@ -161,6 +174,52 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
     })
   }
 
+  const handleAddBookmark = () => {
+    if (!playbackState.isPlaying && !playbackState.isPaused) return
+    
+    const currentVerse = verses.find(v => v.verseNumber === playbackState.currentVerseNumber)
+    if (!currentVerse) return
+
+    const newBookmark: AudioBookmark = {
+      id: `bookmark-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: currentUserId,
+      bookId: currentBookId,
+      bookName: currentBook?.title || '',
+      chapterNumber: currentChapter,
+      verseNumber: playbackState.currentVerseNumber,
+      verseText: currentVerse.text,
+      translation: translationId,
+      narratorId: playbackState.narratorId,
+      narratorName: currentNarrator?.name || '',
+      playbackRate: playbackState.playbackRate,
+      createdAt: Date.now(),
+      playCount: 0
+    }
+
+    setBookmarks(current => [...(current || []), newBookmark])
+    toast.success('Audio moment bookmarked!', {
+      description: `${currentBook?.title} ${currentChapter}:${playbackState.currentVerseNumber}`
+    })
+  }
+
+  const handlePlayBookmark = (bookmark: AudioBookmark) => {
+    stop()
+    setCurrentBookId(bookmark.bookId)
+    setCurrentChapter(bookmark.chapterNumber)
+    setShowAudioPlayer(true)
+    
+    if (bookmark.narratorId !== playbackState.narratorId) {
+      setNarrator(bookmark.narratorId)
+    }
+    if (bookmark.playbackRate !== playbackState.playbackRate) {
+      setPlaybackRate(bookmark.playbackRate)
+    }
+    
+    setTimeout(() => {
+      play(bookmark.verseNumber)
+    }, 500)
+  }
+
   const handleBookChange = (bookId: string) => {
     stop()
     setCurrentBookId(bookId)
@@ -217,6 +276,12 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
         onPlaylistSelect={handlePlaylistSelect}
         currentBookId={currentBookId}
         currentChapter={currentChapter}
+      />
+      <AudioBookmarksDialog
+        open={bookmarksDialogOpen}
+        onOpenChange={setBookmarksDialogOpen}
+        onPlayBookmark={handlePlayBookmark}
+        currentUserId={currentUserId}
       />
       <div className="border-b border-border bg-card px-4 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 flex-1">
@@ -279,6 +344,16 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
             <ListPlus size={18} weight="duotone" />
             <span>Playlists</span>
           </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => setBookmarksDialogOpen(true)}
+            className="gap-2 hidden sm:flex"
+            title="Audio Bookmarks"
+          >
+            <BookmarkSimple size={18} weight="duotone" />
+            <span>Bookmarks</span>
+          </Button>
           {selectedVerses.length > 0 && (
             <>
               <Button 
@@ -320,6 +395,8 @@ export default function ReaderView({ userProfile }: ReaderViewProps) {
             onVolumeChange={setVolume}
             onSleepTimerSet={setSleepTimer}
             onPlaylistOpen={() => setPlaylistDialogOpen(true)}
+            onBookmarkOpen={() => setBookmarksDialogOpen(true)}
+            onAddBookmark={handleAddBookmark}
             totalVerses={verses.length}
           />
         </div>
