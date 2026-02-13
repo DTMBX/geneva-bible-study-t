@@ -51,6 +51,17 @@ import { toast } from 'sonner'
 import GroupInfoDialog from './GroupInfoDialog'
 import InviteMembersDialog from './InviteMembersDialog'
 import GroupAdminSettingsDialog from './GroupAdminSettingsDialog'
+import {
+  getUserRole,
+  canPostMessages,
+  canPinMessages,
+  canUnpinMessages,
+  canDeleteMessage,
+  canEditMessage,
+  canInviteMembers,
+  canUpdateSettings,
+  canReactToMessages,
+} from '@/lib/permissions'
 
 interface GroupDiscussionThreadProps {
   groupId: string
@@ -120,6 +131,11 @@ export default function GroupDiscussionThread({
   const handleSendMessage = () => {
     if (!newMessage.trim() || !group) return
 
+    if (!canPost) {
+      toast.error('You do not have permission to post messages')
+      return
+    }
+
     const message: GroupMessage = {
       id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       groupId,
@@ -159,6 +175,11 @@ export default function GroupDiscussionThread({
   }
 
   const toggleReaction = (messageId: string, reactionKey: string) => {
+    if (!canReact) {
+      toast.error('You do not have permission to react to messages')
+      return
+    }
+
     setMessages((currentMessages) =>
       (currentMessages || []).map(msg => {
         if (msg.id !== messageId) return msg
@@ -285,10 +306,14 @@ export default function GroupDiscussionThread({
     )
   }
 
-  const isAdmin = group.createdBy === currentUserId
-  const currentMember = group.members.find(m => m.userId === currentUserId)
-  const isModerator = currentMember?.role === 'moderator' || currentMember?.role === 'admin'
-  const canPinMessages = isAdmin || isModerator
+  const userRole = getUserRole(group, currentUserId)
+  const isAdmin = userRole === 'admin'
+  const canPin = canPinMessages(userRole)
+  const canUnpin = canUnpinMessages(userRole)
+  const canPost = canPostMessages(userRole, group)
+  const canInvite = canInviteMembers(userRole, group)
+  const canManageSettings = canUpdateSettings(userRole)
+  const canReact = canReactToMessages(userRole)
 
   const pinnedMessages = messages.filter(msg => group.pinnedMessageIds.includes(msg.id) && !msg.deletedAt)
   const regularMessages = messages.filter(msg => !group.pinnedMessageIds.includes(msg.id) && !msg.deletedAt)
@@ -333,13 +358,13 @@ export default function GroupDiscussionThread({
                 <Info size={18} weight="fill" className="mr-2" />
                 Group Info
               </DropdownMenuItem>
-              {group.settings.allowInvites && (
+              {canInvite && (
                 <DropdownMenuItem onClick={() => setShowInviteDialog(true)}>
                   <UserPlus size={18} weight="fill" className="mr-2" />
                   Invite Members
                 </DropdownMenuItem>
               )}
-              {isAdmin && (
+              {canManageSettings && (
                 <DropdownMenuItem onClick={() => setShowAdminSettings(true)}>
                   <Gear size={18} weight="fill" className="mr-2" />
                   Admin Settings
@@ -379,9 +404,8 @@ export default function GroupDiscussionThread({
               </div>
               <div className="space-y-3">
                 {pinnedMessages.map((message) => {
-                  const isOwnMessage = message.fromUserId === currentUserId
-                  const canEdit = isOwnMessage
-                  const canDelete = isOwnMessage || isAdmin || isModerator
+                  const canEditMsg = canEditMessage(userRole, message.fromUserId, currentUserId)
+                  const canDeleteMsg = canDeleteMessage(userRole, message.fromUserId, currentUserId)
 
                   return (
                     <div
@@ -454,19 +478,19 @@ export default function GroupDiscussionThread({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            {canPinMessages && (
+                            {canUnpin && (
                               <DropdownMenuItem onClick={() => handlePinMessage(message.id)}>
                                 <X size={16} weight="bold" className="mr-2" />
                                 Unpin
                               </DropdownMenuItem>
                             )}
-                            {canEdit && (
+                            {canEditMsg && (
                               <DropdownMenuItem onClick={() => setEditingMessage({ id: message.id, content: message.content })}>
                                 <PencilSimple size={16} weight="bold" className="mr-2" />
                                 Edit
                               </DropdownMenuItem>
                             )}
-                            {canDelete && (
+                            {canDeleteMsg && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
@@ -499,8 +523,8 @@ export default function GroupDiscussionThread({
           ) : (
             regularMessages.map((message, index) => {
               const isOwnMessage = message.fromUserId === currentUserId
-              const canEdit = isOwnMessage
-              const canDelete = isOwnMessage || isAdmin || isModerator
+              const canEditMsg = canEditMessage(userRole, message.fromUserId, currentUserId)
+              const canDeleteMsg = canDeleteMessage(userRole, message.fromUserId, currentUserId)
               const showAvatar = index === 0 || regularMessages[index - 1].fromUserId !== message.fromUserId
               const isPinned = group.pinnedMessageIds.includes(message.id)
               const isEditing = editingMessage?.id === message.id
@@ -637,19 +661,19 @@ export default function GroupDiscussionThread({
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                {canPinMessages && (
+                                {(canPin || (isPinned && canUnpin)) && (
                                   <DropdownMenuItem onClick={() => handlePinMessage(message.id)}>
                                     <PushPin size={16} weight={isPinned ? 'fill' : 'regular'} className="mr-2" />
                                     {isPinned ? 'Unpin' : 'Pin'}
                                   </DropdownMenuItem>
                                 )}
-                                {canEdit && (
+                                {canEditMsg && (
                                   <DropdownMenuItem onClick={() => setEditingMessage({ id: message.id, content: message.content })}>
                                     <PencilSimple size={16} weight="bold" className="mr-2" />
                                     Edit
                                   </DropdownMenuItem>
                                 )}
-                                {canDelete && (
+                                {canDeleteMsg && (
                                   <>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
@@ -677,23 +701,29 @@ export default function GroupDiscussionThread({
       </ScrollArea>
 
       <div className="border-t bg-card p-4">
-        <div className="flex gap-2 max-w-4xl mx-auto">
-          <Input
-            placeholder="Type a message..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="flex-1"
-          />
-          <Button
-            onClick={handleSendMessage}
-            disabled={!newMessage.trim()}
-            className="gap-2"
-          >
-            <PaperPlaneRight size={18} weight="fill" />
-            Send
-          </Button>
-        </div>
+        {canPost ? (
+          <div className="flex gap-2 max-w-4xl mx-auto">
+            <Input
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              className="flex-1"
+            />
+            <Button
+              onClick={handleSendMessage}
+              disabled={!newMessage.trim()}
+              className="gap-2"
+            >
+              <PaperPlaneRight size={18} weight="fill" />
+              Send
+            </Button>
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground text-sm py-2 max-w-4xl mx-auto">
+            Only admins and moderators can post messages in this group
+          </div>
+        )}
       </div>
 
       <GroupInfoDialog

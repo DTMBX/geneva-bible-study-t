@@ -5,13 +5,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Globe, Users, Lock, Crown, ShieldCheck, User } from '@phosphor-icons/react'
+import { Globe, Users, Lock, Crown, ShieldCheck, User, Info } from '@phosphor-icons/react'
 import type { GroupDiscussion } from '@/lib/types'
 import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
+import PermissionsInfoDialog from './PermissionsInfoDialog'
 
 interface GroupInfoDialogProps {
   group: GroupDiscussion
@@ -26,6 +29,8 @@ export default function GroupInfoDialog({
   onOpenChange,
   isAdmin
 }: GroupInfoDialogProps) {
+  const [showPermissions, setShowPermissions] = useState(false)
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -123,9 +128,20 @@ export default function GroupInfoDialog({
             <Separator />
 
             <div>
-              <h4 className="text-sm font-medium mb-3">
-                Members ({group.members.length})
-              </h4>
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium">
+                  Members ({group.members.length})
+                </h4>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPermissions(true)}
+                  className="gap-2"
+                >
+                  <Info size={16} weight="fill" />
+                  Role Permissions
+                </Button>
+              </div>
               <div className="space-y-2">
                 {group.members
                   .sort((a, b) => {
@@ -200,6 +216,11 @@ export default function GroupInfoDialog({
           </div>
         </ScrollArea>
       </DialogContent>
+
+      <PermissionsInfoDialog
+        open={showPermissions}
+        onOpenChange={setShowPermissions}
+      />
     </Dialog>
   )
 }

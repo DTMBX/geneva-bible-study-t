@@ -31,9 +31,19 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Separator } from '@/components/ui/separator'
-import { Gear, Crown, ShieldCheck, Trash, UserMinus } from '@phosphor-icons/react'
+import { Gear, Crown, ShieldCheck, Trash, UserMinus, User } from '@phosphor-icons/react'
 import type { GroupDiscussion } from '@/lib/types'
 import { toast } from 'sonner'
+import {
+  getUserRole,
+  canChangeRoles,
+  canRemoveMembers,
+  canDeleteGroup,
+  getRoleDisplayName,
+  getRoleDescription,
+  canPromoteToRole,
+  type GroupRole,
+} from '@/lib/permissions'
 
 interface GroupAdminSettingsDialogProps {
   group: GroupDiscussion
@@ -53,6 +63,11 @@ export default function GroupAdminSettingsDialog({
   const [confirmRemove, setConfirmRemove] = useState<{ userId: string; userName: string } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
+  const currentUserRole = getUserRole(group, currentUserId)
+  const canChangeUserRoles = canChangeRoles(currentUserRole)
+  const canRemoveUsers = canRemoveMembers(currentUserRole)
+  const canDeleteGroupPermission = canDeleteGroup(currentUserRole)
+
   const handleSaveSettings = () => {
     setGroups((currentGroups) =>
       (currentGroups || []).map(g =>
@@ -65,7 +80,12 @@ export default function GroupAdminSettingsDialog({
     onOpenChange(false)
   }
 
-  const handleChangeMemberRole = (userId: string, newRole: 'admin' | 'moderator' | 'member') => {
+  const handleChangeMemberRole = (userId: string, newRole: GroupRole) => {
+    if (!canPromoteToRole(currentUserRole, newRole)) {
+      toast.error('You do not have permission to assign this role')
+      return
+    }
+
     setGroups((currentGroups) =>
       (currentGroups || []).map(g =>
         g.id === group.id
@@ -78,7 +98,7 @@ export default function GroupAdminSettingsDialog({
           : g
       )
     )
-    toast.success(`Member role updated to ${newRole}`)
+    toast.success(`Member role updated to ${getRoleDisplayName(newRole)}`)
   }
 
   const handleRemoveMember = (userId: string) => {
@@ -115,14 +135,14 @@ export default function GroupAdminSettingsDialog({
       .slice(0, 2)
   }
 
-  const getRoleIcon = (role: 'admin' | 'moderator' | 'member') => {
+  const getRoleIcon = (role: GroupRole) => {
     switch (role) {
       case 'admin':
         return <Crown size={16} weight="fill" className="text-amber-500" />
       case 'moderator':
         return <ShieldCheck size={16} weight="fill" className="text-blue-500" />
       default:
-        return null
+        return <User size={16} weight="fill" className="text-muted-foreground" />
     }
   }
 
@@ -224,19 +244,26 @@ export default function GroupAdminSettingsDialog({
                             <div className="flex items-center gap-2">
                               <p className="font-medium truncate">{member.userName}</p>
                               {getRoleIcon(member.role)}
+                              <Badge variant="outline" className="text-xs capitalize">
+                                {getRoleDisplayName(member.role)}
+                              </Badge>
                               {isCreator && (
                                 <Badge variant="outline" className="text-xs">Creator</Badge>
                               )}
                             </div>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {getRoleDescription(member.role)}
+                            </p>
                           </div>
 
-                          {!isCreator && !isCurrentUser && (
+                          {!isCreator && !isCurrentUser && canChangeUserRoles && (
                             <div className="flex items-center gap-2">
                               <Select
                                 value={member.role}
                                 onValueChange={(value) =>
-                                  handleChangeMemberRole(member.userId, value as any)
+                                  handleChangeMemberRole(member.userId, value as GroupRole)
                                 }
+                                disabled={!canPromoteToRole(currentUserRole, member.role)}
                               >
                                 <SelectTrigger className="w-32">
                                   <SelectValue />
@@ -248,17 +275,19 @@ export default function GroupAdminSettingsDialog({
                                 </SelectContent>
                               </Select>
 
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setConfirmRemove({
-                                  userId: member.userId,
-                                  userName: member.userName
-                                })}
-                                className="text-destructive hover:text-destructive"
-                              >
-                                <UserMinus size={18} weight="bold" />
-                              </Button>
+                              {canRemoveUsers && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => setConfirmRemove({
+                                    userId: member.userId,
+                                    userName: member.userName
+                                  })}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <UserMinus size={18} weight="bold" />
+                                </Button>
+                              )}
                             </div>
                           )}
                         </div>
@@ -271,14 +300,20 @@ export default function GroupAdminSettingsDialog({
 
               <div>
                 <h3 className="text-sm font-semibold mb-3 text-destructive">Danger Zone</h3>
-                <Button
-                  variant="destructive"
-                  onClick={() => setConfirmDelete(true)}
-                  className="w-full gap-2"
-                >
-                  <Trash size={18} weight="bold" />
-                  Delete Group
-                </Button>
+                {canDeleteGroupPermission ? (
+                  <Button
+                    variant="destructive"
+                    onClick={() => setConfirmDelete(true)}
+                    className="w-full gap-2"
+                  >
+                    <Trash size={18} weight="bold" />
+                    Delete Group
+                  </Button>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Only group admins can delete the group
+                  </p>
+                )}
               </div>
             </div>
           </ScrollArea>
