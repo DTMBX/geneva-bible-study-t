@@ -13,7 +13,11 @@ const config: CapacitorConfig = {
       backgroundColor: '#5A3A31',
       showSpinner: false,
       androidSpinnerStyle: 'small',
-      iosSpinnerStyle: 'small'
+      iosSpinnerStyle: 'small',
+      androidSplashResourceName: 'splash',
+      iosSplashResourceName: 'Splash',
+      splashFullScreen: true,
+      splashImmersive: true
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_icon_config_sample',

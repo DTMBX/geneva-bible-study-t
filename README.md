@@ -216,6 +216,28 @@ See [LIGHTHOUSE_CI.md](./LIGHTHOUSE_CI.md) for detailed documentation on:
 - Optimization recommendations
 - CI/CD integration details
 
+## 📱 App Icons & Splash Screens
+
+Professional app icons and splash screens for all platforms:
+
+- **PWA Icons:** 16×16 to 512×512 (11 sizes) for web installation
+- **iOS Icons:** Complete AppIcon.appiconset with all required sizes
+- **Android Icons:** Adaptive icons for all densities (mdpi to xxxhdpi)
+- **Splash Screens:** Device-specific splash screens for iOS and Android
+- **Favicons:** Browser tab icons and Apple touch icons
+
+**Quick Setup:**
+```bash
+# Open the icon generator
+open generate-icons.html
+
+# Or run automated setup
+./setup-icons.sh  # Linux/Mac
+setup-icons.bat   # Windows
+```
+
+See [ICONS_README.md](./ICONS_README.md) for quick start guide and [APP_ICONS_SPLASH_GUIDE.md](./APP_ICONS_SPLASH_GUIDE.md) for comprehensive documentation.
+
 ## 📁 Project Structure
 
 ```
