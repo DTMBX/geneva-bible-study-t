@@ -12,6 +12,7 @@ import { toast } from 'sonner'
 import { fetchVerse } from '@/lib/bibleApi'
 import { bibleBooks } from '@/lib/data'
 import type { Bookmark, Conversation, UserConnection, GroupDiscussion } from '@/lib/types'
+import VerseComparisonDialog from '@/components/VerseComparisonDialog'
 
 interface VerseOfTheDayData {
   date: string
@@ -54,6 +55,7 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
   const [likedVerses = [], setLikedVerses] = useKV<string[]>('liked-verses-of-day', [])
   const [selectedTranslation, setSelectedTranslation] = useState<string>(userProfile?.preferences?.defaultTranslation || 'kjv')
   const [isLoadingTranslation, setIsLoadingTranslation] = useState(false)
+  const [comparisonDialogOpen, setComparisonDialogOpen] = useState(false)
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -464,6 +466,16 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
               Share
             </Button>
 
+            <Button
+              variant="secondary"
+              size="default"
+              onClick={() => setComparisonDialogOpen(true)}
+              className="gap-2"
+            >
+              <Translate size={18} weight="duotone" />
+              Compare Translations
+            </Button>
+
             {onNavigateToReader && (
               <Button
                 variant="default"
@@ -583,6 +595,12 @@ export default function VerseOfTheDay({ userProfile, onNavigateToReader, onNavig
           </div>
         </DialogContent>
       </Dialog>
+
+      <VerseComparisonDialog
+        open={comparisonDialogOpen}
+        onOpenChange={setComparisonDialogOpen}
+        verseData={verseData}
+      />
     </>
   )
 }
