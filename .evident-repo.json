@@ -1,0 +1,23 @@
+{
+  "_manifest": "evident-repo",
+  "_version": 1,
+  "name": "Geneva Bible Study",
+  "description": "Offline-capable Bible study app with multi-translation comparison, audio, and reading plans.",
+  "role": "product-satellite",
+  "family": "Personal",
+  "business": "Personal",
+  "stack": "React + TypeScript + PWA",
+  "outputType": "pwa",
+  "exportTargets": ["GitHub Pages", "App Stores"],
+  "siteUrl": null,
+  "githubUrl": "https://github.com/DTMBX/geneva-bible-study-t",
+  "brand": "personal",
+  "packagingStatus": "standalone",
+  "releaseStatus": "production",
+  "sharedStandardsVersion": "1.0",
+  "tools": [],
+  "owner": "Devon Tyler",
+  "satelliteTier": "product",
+  "catalogVisibility": "listed",
+  "tokenFamily": "personal"
+}
