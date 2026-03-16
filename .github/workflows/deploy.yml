@@ -34,6 +34,24 @@ jobs:
         env:
           HUSKY: 0
       
+      - name: Pre-build validation
+        run: |
+          echo "--- CNAME check ---"
+          if [ ! -f CNAME ] && [ ! -f public/CNAME ]; then
+            echo "::error::CNAME file missing"; exit 1
+          fi
+          echo "--- robots.txt check ---"
+          if [ ! -f robots.txt ] && [ ! -f public/robots.txt ]; then
+            echo "::warning::robots.txt missing (SEO impact)"
+          fi
+          echo "--- package.json name check ---"
+          PKG_NAME=$(node -p "require('./package.json').name")
+          REPO_NAME=$(basename "$GITHUB_REPOSITORY")
+          if [ "$PKG_NAME" != "$REPO_NAME" ]; then
+            echo "::warning::package.json name '$PKG_NAME' != repo name '$REPO_NAME'"
+          fi
+          echo "Validation passed"
+      
       - name: Build application
         run: npm run build
         env:
