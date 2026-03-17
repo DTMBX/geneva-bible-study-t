@@ -39,3 +39,9 @@ runtime.config.json
 # Lighthouse CI
 .lighthouseci/
 lhci-reports/
+
+# Playwright
+e2e-results/
+e2e-report/
+test-results/
+playwright-report/
