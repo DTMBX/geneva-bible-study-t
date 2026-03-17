@@ -26,8 +26,11 @@ dist-ssr
 
 .env
 **/agent-eval-report*
-packages
-pids
+
+# Spark artifacts (removed)
+spark.meta.json
+.spark-initial-sha
+runtime.config.json
 .file-manifest
 .devcontainer/
 

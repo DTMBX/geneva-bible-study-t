@@ -188,7 +188,7 @@ setItems([...items, newItem])
 ```typescript
 // ✅ Good
 import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/lib/local-storage-kv'
 import { Button } from '@/components/ui/button'
 import { BookOpen } from '@phosphor-icons/react'
 import { useBibleChapter } from '@/hooks/use-bible-api'
@@ -199,7 +199,7 @@ import { useState } from 'react'
 import { BookOpen } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
 import { useBibleChapter } from '@/hooks/use-bible-api'
-import { useKV } from '@github/spark/hooks'
+import { useKV } from '@/lib/local-storage-kv'
 ```
 
 ## 🧩 Component Guidelines

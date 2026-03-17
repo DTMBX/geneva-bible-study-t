@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useKV } from '@github/spark/hooks'
+import { useState, useEffect } from 'react'
+import { useKV } from '@/lib/local-storage-kv'
 import { BookOpen, Books, Columns, MagnifyingGlass, Clock, Gear, CalendarCheck, Users, ChatCircle, UsersThree, PushPin, Moon, Sun } from '@phosphor-icons/react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
@@ -52,13 +52,11 @@ function App() {
   const [currentUserId, setCurrentUserId] = useState<string>('')
   const [messageNavigation, setMessageNavigation] = useState<{ friendId: string; verseRef?: any } | null>(null)
 
-  useState(() => {
-    const fetchUser = async () => {
-      const user = await window.spark.user()
+  useEffect(() => {
+    window.spark.user().then(user => {
       setCurrentUserId(user?.id?.toString() || 'anonymous')
-    }
-    fetchUser()
-  })
+    })
+  }, [])
 
   const pendingRequestCount = friendRequests.filter(req => req.status === 'pending').length
   const unreadMessagesCount = conversations.reduce((total, conv) => {
